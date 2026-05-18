@@ -86,6 +86,36 @@ class TestParseTxInput:
     def test_hex_empty(self) -> None:
         assert _parse_tx_input("", hex_mode=True) == b""
 
+    def test_ascii_null_byte(self) -> None:
+        assert _unescape_ascii("\\x00") == b"\x00"
+
+    def test_ascii_hex_at_end_of_string(self) -> None:
+        assert _unescape_ascii("prefix\\x41") == b"prefixA"
+
+    def test_ascii_consecutive_hex(self) -> None:
+        result = _unescape_ascii("\\x48\\x65\\x6C\\x6C\\x6F")
+        assert result == b"Hello"
+
+    def test_ascii_escape_only(self) -> None:
+        assert _unescape_ascii("\\n") == b"\n"
+        assert _unescape_ascii("\\r") == b"\r"
+        assert _unescape_ascii("\\t") == b"\t"
+
+    def test_ascii_incomplete_hex_at_end(self) -> None:
+        assert _unescape_ascii("\\x") == b"\\x"
+        assert _unescape_ascii("\\x0") == b"\\x0"
+
+    def test_ascii_invalid_hex_passthrough(self) -> None:
+        assert _unescape_ascii("\\xGH") == b"\\xGH"
+
+    def test_ascii_escaped_backslash_before_hex(self) -> None:
+        assert _unescape_ascii("\\\\x41") == b"\\x41"
+
+    def test_ascii_hex_sends_correct_bytes(self) -> None:
+        result = _unescape_ascii("foo\\x0A\\x0D")
+        assert result == b"foo\n\r"
+        assert result.hex() == "666f6f0a0d"
+
 
 class TestSerialManagerWrite:
     def test_write_success(self) -> None:
