@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import serial
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
@@ -8,11 +9,90 @@ from textual.widgets import Button, Footer, Header, Label, ListItem, ListView, S
 
 from sermon.serial_manager import SerialConfig
 
+BAUD_RATES = [
+    300,
+    600,
+    1200,
+    2400,
+    4800,
+    9600,
+    19200,
+    38400,
+    57600,
+    115200,
+    230400,
+    460800,
+    921600,
+]
+
+DATA_BITS = [
+    ("5", serial.FIVEBITS),
+    ("6", serial.SIXBITS),
+    ("7", serial.SEVENBITS),
+    ("8", serial.EIGHTBITS),
+]
+
+PARITY_OPTIONS = [
+    ("None", serial.PARITY_NONE),
+    ("Even", serial.PARITY_EVEN),
+    ("Odd", serial.PARITY_ODD),
+    ("Mark", serial.PARITY_MARK),
+    ("Space", serial.PARITY_SPACE),
+]
+
+STOP_BITS = [
+    ("1", serial.STOPBITS_ONE),
+    ("1.5", serial.STOPBITS_ONE_POINT_FIVE),
+    ("2", serial.STOPBITS_TWO),
+]
+
 
 class PortScreen(Screen):
     BINDINGS = [
         Binding("escape", "dismiss", "Cancel"),
     ]
+
+    CSS = """
+    PortScreen {
+        align: center top;
+    }
+
+    #port-content {
+        width: 60;
+        margin: 1;
+    }
+
+    #port-label {
+        text-style: bold;
+        margin-bottom: 1;
+    }
+
+    #port-list {
+        height: 6;
+        margin-bottom: 1;
+    }
+
+    .config-row {
+        height: 3;
+        align: left middle;
+        margin-bottom: 0;
+    }
+
+    .config-row Label {
+        width: 8;
+        text-style: bold;
+        padding: 1 0;
+    }
+
+    .config-select {
+        width: 1fr;
+    }
+
+    #connect-btn {
+        margin-top: 1;
+        width: 100%;
+    }
+    """
 
     def __init__(self, ports: list[dict], *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -24,25 +104,44 @@ class PortScreen(Screen):
             Label("Select Serial Port", id="port-label"),
             ListView(id="port-list"),
             Horizontal(
-                Label("Baud rate:"),
+                Label("Baud:"),
                 Select(
-                    [
-                        (str(b), b)
-                        for b in [
-                            9600,
-                            19200,
-                            38400,
-                            57600,
-                            115200,
-                            230400,
-                            460800,
-                            921600,
-                        ]
-                    ],
+                    [(str(b), b) for b in BAUD_RATES],
                     value=115200,
                     id="baud-select",
+                    classes="config-select",
                 ),
-                id="baud-row",
+                classes="config-row",
+            ),
+            Horizontal(
+                Label("Data:"),
+                Select(
+                    DATA_BITS,
+                    value=serial.EIGHTBITS,
+                    id="data-select",
+                    classes="config-select",
+                ),
+                classes="config-row",
+            ),
+            Horizontal(
+                Label("Parity:"),
+                Select(
+                    PARITY_OPTIONS,
+                    value=serial.PARITY_NONE,
+                    id="parity-select",
+                    classes="config-select",
+                ),
+                classes="config-row",
+            ),
+            Horizontal(
+                Label("Stop:"),
+                Select(
+                    STOP_BITS,
+                    value=serial.STOPBITS_ONE,
+                    id="stop-select",
+                    classes="config-select",
+                ),
+                classes="config-row",
             ),
             Button("Connect", id="connect-btn", variant="primary"),
             id="port-content",
@@ -71,9 +170,15 @@ class PortScreen(Screen):
             idx = list_view.index
             if idx < 0 or idx >= len(self._ports):
                 return
-            baud_select = self.query_one("#baud-select", Select)
+            baud = self.query_one("#baud-select", Select)
+            data = self.query_one("#data-select", Select)
+            parity = self.query_one("#parity-select", Select)
+            stop = self.query_one("#stop-select", Select)
             config = SerialConfig(
                 port=self._ports[idx]["device"],
-                baudrate=baud_select.value if baud_select.value else 115200,
+                baudrate=baud.value if baud.value else 115200,
+                bytesize=data.value if data.value is not None else serial.EIGHTBITS,
+                parity=parity.value if parity.value else serial.PARITY_NONE,
+                stopbits=stop.value if stop.value else serial.STOPBITS_ONE,
             )
             self.dismiss(config)
