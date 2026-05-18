@@ -5,6 +5,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Literal
 
 FieldType = Literal["const", "checksum", "wildcard"]
+Quantifier = Literal["*", "+"]
 
 
 @dataclass
@@ -15,6 +16,7 @@ class FieldDefinition:
     checksum_algorithm: str = ""
     checksum_scope: list[int] = field(default_factory=list)
     capture_name: str = ""
+    quantifier: Quantifier = "*"
 
     def byte_length(self) -> int:
         if self.field_type == "checksum":
