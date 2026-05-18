@@ -183,7 +183,7 @@ class PortScreen(Screen):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "connect-btn":
             list_view = self.query_one("#port-list", ListView)
-            if list_view.index is None or list_view.highlight_child is None:
+            if list_view.index is None:
                 return
             idx = list_view.index
             if idx < 0 or idx >= len(self._ports):
