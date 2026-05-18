@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from sermon.cli import _unescape_ascii
 from sermon.serial_manager import SerialError
 
 
@@ -16,7 +17,7 @@ def _parse_tx_input(text: str, hex_mode: bool) -> bytes:
         if len(raw) % 2 != 0:
             raise ValueError("Hex string must have even length")
         return bytes.fromhex(raw)
-    return text.encode("ascii", errors="replace")
+    return _unescape_ascii(text)
 
 
 class TestParseTxInput:
@@ -29,10 +30,41 @@ class TestParseTxInput:
     def test_ascii_whitespace(self) -> None:
         assert _parse_tx_input("  ", hex_mode=False) == b""
 
+    def test_ascii_newline(self) -> None:
+        assert _parse_tx_input("line1\\nline2", hex_mode=False) == b"line1\nline2"
+
+    def test_ascii_carriage_return(self) -> None:
+        assert _parse_tx_input("hello\\rworld", hex_mode=False) == b"hello\rworld"
+
+    def test_ascii_tab(self) -> None:
+        assert _parse_tx_input("a\\tb", hex_mode=False) == b"a\tb"
+
+    def test_ascii_backslash(self) -> None:
+        assert (
+            _parse_tx_input("path\\\\to\\\\file", hex_mode=False) == b"path\\to\\file"
+        )
+
+    def test_ascii_hex_escape(self) -> None:
+        assert _parse_tx_input("\\x41\\x42", hex_mode=False) == b"AB"
+
+    def test_ascii_mixed_escapes(self) -> None:
+        assert _parse_tx_input("\\r\\n", hex_mode=False) == b"\r\n"
+
+    def test_ascii_combined(self) -> None:
+        assert _parse_tx_input("AT\\r\\n", hex_mode=False) == b"AT\r\n"
+
+    def test_ascii_no_escapes_passthrough(self) -> None:
+        assert _parse_tx_input("hello world", hex_mode=False) == b"hello world"
+
+    def test_ascii_bare_backslash_passthrough(self) -> None:
+        assert _parse_tx_input("test\\", hex_mode=False) == b"test\\"
+
+    def test_ascii_unknown_escape_passthrough(self) -> None:
+        assert _parse_tx_input("\\q\\z", hex_mode=False) == b"\\q\\z"
+
     def test_ascii_non_ascii_replaced(self) -> None:
         result = _parse_tx_input("héllo", hex_mode=False)
         assert isinstance(result, bytes)
-        assert result == "héllo".encode("ascii", errors="replace")
 
     def test_hex_simple(self) -> None:
         assert _parse_tx_input("AABB", hex_mode=True) == bytes([0xAA, 0xBB])

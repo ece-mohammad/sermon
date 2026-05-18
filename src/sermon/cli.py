@@ -34,6 +34,42 @@ _STOPBITS_LABELS = {
 }
 
 
+def _unescape_ascii(text: str) -> bytes:
+    result = bytearray()
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "\\" and i + 1 < len(text):
+            nxt = text[i + 1]
+            if nxt == "n":
+                result.append(0x0A)
+                i += 2
+                continue
+            if nxt == "r":
+                result.append(0x0D)
+                i += 2
+                continue
+            if nxt == "t":
+                result.append(0x09)
+                i += 2
+                continue
+            if nxt == "\\":
+                result.append(0x5C)
+                i += 2
+                continue
+            if nxt == "x" and i + 3 < len(text):
+                try:
+                    val = int(text[i + 2 : i + 4], 16)
+                    result.append(val)
+                    i += 4
+                    continue
+                except ValueError:
+                    pass
+        result.append(ord(ch))
+        i += 1
+    return bytes(result)
+
+
 def _fmt_config(cfg: SerialConfig) -> str:
     data = _BYTESIZE_LABELS.get(cfg.bytesize, str(cfg.bytesize))
     parity = _PARITY_LABELS.get(cfg.parity, cfg.parity)
@@ -90,7 +126,6 @@ class SermonApp(App):
         Binding("ctrl+p", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
-        Binding("ctrl+t", "focus_tx", "TX", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
     ]
 
@@ -146,9 +181,6 @@ class SermonApp(App):
         except SerialError as e:
             self.notify(str(e), severity="error")
 
-    def action_focus_tx(self) -> None:
-        self.query_one("#tx-input", Input).focus()
-
     def action_send_data(self, text: str) -> None:
         text = text.strip()
         if not text:
@@ -165,7 +197,7 @@ class SermonApp(App):
                     return
                 data = bytes.fromhex(raw)
             else:
-                data = text.encode("ascii", errors="replace")
+                data = _unescape_ascii(text)
             self.serial.write(data)
             self.notify(f"TX: {len(data)} bytes")
         except ValueError:
