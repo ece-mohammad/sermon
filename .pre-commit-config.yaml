@@ -17,3 +17,14 @@ repos:
     hooks:
       - id: flake8
         additional_dependencies: []
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: .venv/bin/python -m pytest tests/ -q
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        args: ["tests/", "-q"]

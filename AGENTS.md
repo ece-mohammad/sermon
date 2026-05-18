@@ -19,8 +19,9 @@ What matters (only the non-obvious bits an agent would otherwise guess wrong)
   - This repo uses a src/ layout. If you need to import sermon as a package for tests or REPL, either install the package properly or run with `PYTHONPATH=src` so `import sermon` resolves.
 
 - Tests / tooling:
-  - There are no test or CI configs in the repo root. Do not run `pytest` expecting project tests — none are present.
-  - There are no enforced linters/formatters configured here (no tox/pre-commit configured in repo). .git/hooks contains only sample hooks.
+  - Unit tests use `pytest`. Run with: `PYTHONPATH=src python -m pytest tests/ -v`
+  - Test files live in `tests/` and mirror `src/sermon/` package structure.
+  - Always add or update tests in the same commit as the code they cover.
 
 - Local environment notes:
   - A .venv folder is present in the repository. Treat it as a local dev environment; avoid committing or modifying it accidentally.
