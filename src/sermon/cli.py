@@ -144,6 +144,7 @@ class SermonApp(App):
         Binding("ctrl+p", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
+        Binding("ctrl+t", "toggle_dark", "Light/Dark", priority=True),
         Binding("f2", "show_history", "History", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
     ]
@@ -280,6 +281,10 @@ class SermonApp(App):
         self._set_mode(hex_mode)
         self.action_send_data(text)
         self.query_one("#tx-input", TxInput).focus()
+
+    def action_toggle_dark(self) -> None:
+        self.theme = "textual-light" if self.theme == "textual-dark" else "textual-dark"
+        self.notify("Light mode" if self.theme == "textual-light" else "Dark mode")
 
     def action_toggle_hex(self) -> None:
         rx_pane = self.query_one(RxPane)

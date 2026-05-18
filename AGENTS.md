@@ -98,3 +98,4 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] F2 opens scrollable history list (most recent first), select to re-transmit
 - [x] TX input auto-focuses on app launch
 - [x] History list: alternating row colors, HEX/ASC mode labels colored differently
+- [x] Ctrl+T toggles dark/light theme
