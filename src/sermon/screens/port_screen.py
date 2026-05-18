@@ -58,23 +58,22 @@ class PortScreen(Screen):
                 label = f"{p['device']}"
                 if p["description"]:
                     label += f" — {p['description']}"
-                list_view.append(ListItem(Label(label), id=p["device"]))
+                list_view.append(ListItem(Label(label)))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
-        if event.item.id:
-            self.query_one("#baud-select", Select).focus()
+        self.query_one("#baud-select", Select).focus()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "connect-btn":
             list_view = self.query_one("#port-list", ListView)
-            if not list_view.index or not self._ports:
+            if list_view.index is None or list_view.highlight_child is None:
                 return
-            selected = list_view.children[list_view.index]
-            if not selected.id:
+            idx = list_view.index
+            if idx < 0 or idx >= len(self._ports):
                 return
             baud_select = self.query_one("#baud-select", Select)
             config = SerialConfig(
-                port=selected.id,
+                port=self._ports[idx]["device"],
                 baudrate=baud_select.value if baud_select.value else 115200,
             )
             self.dismiss(config)
