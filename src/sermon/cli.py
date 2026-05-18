@@ -77,6 +77,23 @@ def _fmt_config(cfg: SerialConfig) -> str:
     return f"{cfg.port} {cfg.baudrate} {data} {parity} {stop}"
 
 
+class TxInput(Input):
+    BINDINGS = [
+        Binding("up", "history_back", "", show=False),
+        Binding("down", "history_forward", "", show=False),
+    ]
+
+    def action_history_back(self) -> None:
+        app = self.app
+        if hasattr(app, "_history_back"):
+            app._history_back(self)
+
+    def action_history_forward(self) -> None:
+        app = self.app
+        if hasattr(app, "_history_forward"):
+            app._history_forward(self)
+
+
 class SermonApp(App):
     TITLE = "Sermon — Serial Monitor"
     CSS = """
@@ -133,6 +150,8 @@ class SermonApp(App):
         super().__init__()
         self.serial = SerialManager()
         self._reader_worker = None
+        self._tx_history: list[str] = []
+        self._tx_history_index = -1
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -144,7 +163,7 @@ class SermonApp(App):
         yield RxPane()
         yield Horizontal(
             Label("TX>", id="tx-label"),
-            Input(id="tx-input", placeholder="type message, Enter to send"),
+            TxInput(id="tx-input", placeholder="type message, Enter to send"),
             id="tx-row",
         )
         yield Footer()
@@ -207,8 +226,33 @@ class SermonApp(App):
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "tx-input":
+            text = event.value.strip()
+            if text and (not self._tx_history or self._tx_history[-1] != text):
+                self._tx_history.append(text)
+            self._tx_history_index = -1
             self.action_send_data(event.value)
             event.input.clear()
+
+    def _history_back(self, inp: Input) -> None:
+        if not self._tx_history:
+            return
+        if self._tx_history_index == -1:
+            self._tx_history_index = len(self._tx_history) - 1
+        elif self._tx_history_index > 0:
+            self._tx_history_index -= 1
+        inp.value = self._tx_history[self._tx_history_index]
+        inp.cursor_position = len(inp.value)
+
+    def _history_forward(self, inp: Input) -> None:
+        if self._tx_history_index == -1:
+            return
+        self._tx_history_index += 1
+        if self._tx_history_index >= len(self._tx_history):
+            self._tx_history_index = -1
+            inp.clear()
+        else:
+            inp.value = self._tx_history[self._tx_history_index]
+            inp.cursor_position = len(inp.value)
 
     def action_toggle_hex(self) -> None:
         rx_pane = self.query_one(RxPane)
