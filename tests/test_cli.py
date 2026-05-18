@@ -1,0 +1,90 @@
+from __future__ import annotations
+
+from unittest.mock import MagicMock
+
+import pytest
+
+from sermon.serial_manager import SerialError
+
+
+def _parse_tx_input(text: str, hex_mode: bool) -> bytes:
+    text = text.strip()
+    if not text:
+        return b""
+    if hex_mode:
+        raw = text.replace(" ", "").replace("\t", "")
+        if len(raw) % 2 != 0:
+            raise ValueError("Hex string must have even length")
+        return bytes.fromhex(raw)
+    return text.encode("ascii", errors="replace")
+
+
+class TestParseTxInput:
+    def test_ascii_simple(self) -> None:
+        assert _parse_tx_input("hello", hex_mode=False) == b"hello"
+
+    def test_ascii_empty(self) -> None:
+        assert _parse_tx_input("", hex_mode=False) == b""
+
+    def test_ascii_whitespace(self) -> None:
+        assert _parse_tx_input("  ", hex_mode=False) == b""
+
+    def test_ascii_non_ascii_replaced(self) -> None:
+        result = _parse_tx_input("héllo", hex_mode=False)
+        assert isinstance(result, bytes)
+        assert result == "héllo".encode("ascii", errors="replace")
+
+    def test_hex_simple(self) -> None:
+        assert _parse_tx_input("AABB", hex_mode=True) == bytes([0xAA, 0xBB])
+
+    def test_hex_with_spaces(self) -> None:
+        assert _parse_tx_input("AA BB", hex_mode=True) == bytes([0xAA, 0xBB])
+
+    def test_hex_lowercase(self) -> None:
+        assert _parse_tx_input("aabb", hex_mode=True) == bytes([0xAA, 0xBB])
+
+    def test_hex_odd_length_raises(self) -> None:
+        with pytest.raises(ValueError, match="even length"):
+            _parse_tx_input("A", hex_mode=True)
+
+    def test_hex_invalid_chars_raises(self) -> None:
+        with pytest.raises(ValueError, match="non-hexadecimal"):
+            _parse_tx_input("XX", hex_mode=True)
+
+    def test_hex_empty(self) -> None:
+        assert _parse_tx_input("", hex_mode=True) == b""
+
+
+class TestSerialManagerWrite:
+    def test_write_success(self) -> None:
+        from sermon.serial_manager import SerialManager
+
+        sm = SerialManager()
+        sm._serial = MagicMock()
+        sm._serial.is_open = True
+        sm._serial.write = MagicMock()
+
+        sm.write(b"hello")
+        sm._serial.write.assert_called_once_with(b"hello")
+
+    def test_write_not_connected(self) -> None:
+        from sermon.serial_manager import SerialManager
+
+        sm = SerialManager()
+        sm._serial = None
+
+        with pytest.raises(SerialError, match="Not connected"):
+            sm.write(b"data")
+
+    def test_write_serial_error(self) -> None:
+        import serial
+
+        from sermon.serial_manager import SerialManager
+
+        sm = SerialManager()
+        sm._serial = MagicMock()
+        sm._serial.is_open = True
+        sm._serial.write = MagicMock(side_effect=serial.SerialException("port error"))
+
+        with pytest.raises(SerialError, match="port error"):
+            sm.write(b"data")

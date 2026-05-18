@@ -6,7 +6,7 @@ import serial as pyserial
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
-from textual.widgets import Footer, Header, Label
+from textual.widgets import Footer, Header, Input, Label
 
 from sermon.screens.port_screen import PortScreen
 from sermon.serial_manager import SerialConfig, SerialError, SerialManager
@@ -69,11 +69,28 @@ class SermonApp(App):
         color: $text;
         text-style: bold;
     }
+    #tx-row {
+        height: 3;
+        dock: bottom;
+        layout: horizontal;
+    }
+    #tx-label {
+        padding: 0 1;
+        width: 4;
+        background: $panel;
+        color: $text;
+        text-style: bold;
+        content-align: center middle;
+    }
+    #tx-input {
+        width: 1fr;
+    }
     """
     BINDINGS = [
         Binding("ctrl+p", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
+        Binding("ctrl+t", "focus_tx", "TX", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
     ]
 
@@ -90,6 +107,11 @@ class SermonApp(App):
             id="status-row",
         )
         yield RxPane()
+        yield Horizontal(
+            Label("TX>", id="tx-label"),
+            Input(id="tx-input", placeholder="type message, Enter to send"),
+            id="tx-row",
+        )
         yield Footer()
 
     def on_mount(self) -> None:
@@ -123,6 +145,38 @@ class SermonApp(App):
             self.notify(f"Connected to {config.port}")
         except SerialError as e:
             self.notify(str(e), severity="error")
+
+    def action_focus_tx(self) -> None:
+        self.query_one("#tx-input", Input).focus()
+
+    def action_send_data(self, text: str) -> None:
+        text = text.strip()
+        if not text:
+            return
+        if not self.serial.is_connected:
+            self.notify("Not connected", severity="error")
+            return
+        rx_pane = self.query_one(RxPane)
+        try:
+            if rx_pane.hex_mode:
+                raw = text.replace(" ", "").replace("\t", "")
+                if len(raw) % 2 != 0:
+                    self.notify("Hex string must have even length", severity="error")
+                    return
+                data = bytes.fromhex(raw)
+            else:
+                data = text.encode("ascii", errors="replace")
+            self.serial.write(data)
+            self.notify(f"TX: {len(data)} bytes")
+        except ValueError:
+            self.notify("Invalid hex characters", severity="error")
+        except SerialError as e:
+            self.notify(str(e), severity="error")
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        if event.input.id == "tx-input":
+            self.action_send_data(event.value)
+            event.input.clear()
 
     def action_toggle_hex(self) -> None:
         rx_pane = self.query_one(RxPane)
