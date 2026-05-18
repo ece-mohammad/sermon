@@ -1,48 +1,6 @@
 from typing import Callable
 
-
-def _build_crc8_table(poly: int = 0x07) -> list[int]:
-    table = []
-    for i in range(256):
-        crc = i
-        for _ in range(8):
-            if crc & 0x80:
-                crc = ((crc << 1) ^ poly) & 0xFF
-            else:
-                crc = (crc << 1) & 0xFF
-        table.append(crc)
-    return table
-
-
-def _build_crc16r_table(poly: int = 0xA001) -> list[int]:
-    table = []
-    for i in range(256):
-        crc = i
-        for _ in range(8):
-            if crc & 0x0001:
-                crc = ((crc >> 1) ^ poly) & 0xFFFF
-            else:
-                crc = (crc >> 1) & 0xFFFF
-        table.append(crc)
-    return table
-
-
-def _build_crc32r_table(poly: int = 0xEDB88320) -> list[int]:
-    table = []
-    for i in range(256):
-        crc = i
-        for _ in range(8):
-            if crc & 0x00000001:
-                crc = ((crc >> 1) ^ poly) & 0xFFFFFFFF
-            else:
-                crc = (crc >> 1) & 0xFFFFFFFF
-        table.append(crc)
-    return table
-
-
-CRC8_TABLE = _build_crc8_table()
-CRC16R_TABLE = _build_crc16r_table()
-CRC32R_TABLE = _build_crc32r_table()
+from crccheck.crc import Crc8, Crc16Arc, Crc32
 
 
 def compute_lrc(data: bytes) -> int:
@@ -58,24 +16,15 @@ def compute_mod256(data: bytes) -> int:
 
 
 def compute_crc8(data: bytes) -> int:
-    crc = 0
-    for b in data:
-        crc = CRC8_TABLE[(crc ^ b) & 0xFF]
-    return crc & 0xFF
+    return Crc8.calc(data)
 
 
 def compute_crc16(data: bytes) -> int:
-    crc = 0
-    for b in data:
-        crc = ((crc >> 8) ^ CRC16R_TABLE[(crc ^ b) & 0xFF]) & 0xFFFF
-    return crc & 0xFFFF
+    return Crc16Arc.calc(data)
 
 
 def compute_crc32(data: bytes) -> int:
-    crc = 0xFFFFFFFF
-    for b in data:
-        crc = ((crc >> 8) ^ CRC32R_TABLE[(crc ^ b) & 0xFF]) & 0xFFFFFFFF
-    return (crc ^ 0xFFFFFFFF) & 0xFFFFFFFF
+    return Crc32.calc(data)
 
 
 _CHECKSUM_FUNCS: dict[str, Callable[[bytes], int]] = {
