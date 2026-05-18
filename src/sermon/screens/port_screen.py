@@ -5,7 +5,16 @@ from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, Footer, Header, Label, ListItem, ListView, Select
+from textual.widgets import (
+    Button,
+    Footer,
+    Header,
+    Input,
+    Label,
+    ListItem,
+    ListView,
+    Select,
+)
 
 from sermon.serial_manager import SerialConfig
 
@@ -24,6 +33,8 @@ BAUD_RATES = [
     460800,
     921600,
 ]
+
+BAUD_HINT = "Common: " + ", ".join(str(b) for b in BAUD_RATES)
 
 DATA_BITS = [
     ("5", serial.FIVEBITS),
@@ -88,6 +99,17 @@ class PortScreen(Screen):
         width: 1fr;
     }
 
+    #baud-input {
+        width: 1fr;
+    }
+
+    #baud-hint {
+        color: $text-disabled;
+        text-style: italic;
+        margin-left: 8;
+        margin-bottom: 1;
+    }
+
     #connect-btn {
         margin-top: 1;
         width: 100%;
@@ -105,14 +127,10 @@ class PortScreen(Screen):
             ListView(id="port-list"),
             Horizontal(
                 Label("Baud:"),
-                Select(
-                    [(str(b), b) for b in BAUD_RATES],
-                    value=115200,
-                    id="baud-select",
-                    classes="config-select",
-                ),
+                Input(value="115200", id="baud-input", type="integer"),
                 classes="config-row",
             ),
+            Label(BAUD_HINT, id="baud-hint"),
             Horizontal(
                 Label("Data:"),
                 Select(
@@ -160,7 +178,7 @@ class PortScreen(Screen):
                 list_view.append(ListItem(Label(label)))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
-        self.query_one("#baud-select", Select).focus()
+        self.query_one("#baud-input", Input).focus()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "connect-btn":
@@ -170,13 +188,22 @@ class PortScreen(Screen):
             idx = list_view.index
             if idx < 0 or idx >= len(self._ports):
                 return
-            baud = self.query_one("#baud-select", Select)
+            baud_input = self.query_one("#baud-input", Input)
             data = self.query_one("#data-select", Select)
             parity = self.query_one("#parity-select", Select)
             stop = self.query_one("#stop-select", Select)
+            try:
+                baudrate = (
+                    int(baud_input.value.strip())
+                    if baud_input.value.strip()
+                    else 115200
+                )
+            except ValueError:
+                self.notify("Invalid baud rate", severity="error")
+                return
             config = SerialConfig(
                 port=self._ports[idx]["device"],
-                baudrate=baud.value if baud.value else 115200,
+                baudrate=baudrate,
                 bytesize=data.value if data.value is not None else serial.EIGHTBITS,
                 parity=parity.value if parity.value else serial.PARITY_NONE,
                 stopbits=stop.value if stop.value else serial.STOPBITS_ONE,
