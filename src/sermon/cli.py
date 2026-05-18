@@ -150,7 +150,7 @@ class SermonApp(App):
         super().__init__()
         self.serial = SerialManager()
         self._reader_worker = None
-        self._tx_history: list[str] = []
+        self._tx_history: list[tuple[str, bool]] = []
         self._tx_history_index = -1
 
     def compose(self) -> ComposeResult:
@@ -171,6 +171,7 @@ class SermonApp(App):
     def on_mount(self) -> None:
         self._update_status()
         self._update_mode_indicator()
+        self.query_one("#tx-input", TxInput).focus()
 
     def action_connect_port(self) -> None:
         ports = SerialManager.list_ports()
@@ -227,8 +228,11 @@ class SermonApp(App):
     def on_input_submitted(self, event: Input.Submitted) -> None:
         if event.input.id == "tx-input":
             text = event.value.strip()
-            if text and (not self._tx_history or self._tx_history[-1] != text):
-                self._tx_history.append(text)
+            if text:
+                rx_pane = self.query_one(RxPane)
+                entry = (text, rx_pane.hex_mode)
+                if not self._tx_history or self._tx_history[-1] != entry:
+                    self._tx_history.append(entry)
             self._tx_history_index = -1
             self.action_send_data(event.value)
             event.input.clear()
@@ -240,8 +244,10 @@ class SermonApp(App):
             self._tx_history_index = len(self._tx_history) - 1
         elif self._tx_history_index > 0:
             self._tx_history_index -= 1
-        inp.value = self._tx_history[self._tx_history_index]
+        text, hex_mode = self._tx_history[self._tx_history_index]
+        inp.value = text
         inp.cursor_position = len(inp.value)
+        self._set_mode(hex_mode)
 
     def _history_forward(self, inp: Input) -> None:
         if self._tx_history_index == -1:
@@ -251,8 +257,16 @@ class SermonApp(App):
             self._tx_history_index = -1
             inp.clear()
         else:
-            inp.value = self._tx_history[self._tx_history_index]
+            text, hex_mode = self._tx_history[self._tx_history_index]
+            inp.value = text
             inp.cursor_position = len(inp.value)
+            self._set_mode(hex_mode)
+
+    def _set_mode(self, hex_mode: bool) -> None:
+        rx_pane = self.query_one(RxPane)
+        if rx_pane.hex_mode != hex_mode:
+            rx_pane.hex_mode = hex_mode
+            self._update_mode_indicator()
 
     def action_toggle_hex(self) -> None:
         rx_pane = self.query_one(RxPane)
