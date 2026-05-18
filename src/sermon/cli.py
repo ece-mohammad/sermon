@@ -8,6 +8,7 @@ from textual.binding import Binding
 from textual.containers import Horizontal
 from textual.widgets import Footer, Header, Input, Label
 
+from sermon.screens.history_screen import TxHistoryScreen
 from sermon.screens.port_screen import PortScreen
 from sermon.serial_manager import SerialConfig, SerialError, SerialManager
 from sermon.widgets.rx_pane import RxPane
@@ -143,6 +144,7 @@ class SermonApp(App):
         Binding("ctrl+p", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
+        Binding("f2", "show_history", "History", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
     ]
 
@@ -267,6 +269,17 @@ class SermonApp(App):
         if rx_pane.hex_mode != hex_mode:
             rx_pane.hex_mode = hex_mode
             self._update_mode_indicator()
+
+    def action_show_history(self) -> None:
+        self.push_screen(TxHistoryScreen(self._tx_history), self._on_history_selected)
+
+    def _on_history_selected(self, result: tuple[str, bool] | None) -> None:
+        if result is None:
+            return
+        text, hex_mode = result
+        self._set_mode(hex_mode)
+        self.action_send_data(text)
+        self.query_one("#tx-input", TxInput).focus()
 
     def action_toggle_hex(self) -> None:
         rx_pane = self.query_one(RxPane)

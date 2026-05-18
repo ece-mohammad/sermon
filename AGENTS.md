@@ -93,3 +93,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] HEX mode in TX parses hex string from input
 - [x] Pytest pre-commit hook, pyproject.toml pytest config, dev dependencies
 - [x] 134 unit tests across checksum, data model, matcher, and CLI modules
+- [x] Transmit history with up/down arrow navigation in TX input
+- [x] History preserves HEX/ASCII mode per entry; cycling restores mode
+- [x] F2 opens scrollable history list (most recent first), select to re-transmit
+- [x] TX input auto-focuses on app launch
