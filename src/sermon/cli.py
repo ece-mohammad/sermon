@@ -14,6 +14,7 @@ from sermon.widgets.rx_pane import RxPane
 class SermonApp(App):
     BINDINGS = [
         Binding("ctrl+p", "connect_port", "Port", priority=True),
+        Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
     ]
@@ -32,14 +33,17 @@ class SermonApp(App):
         self._update_title()
 
     def action_connect_port(self) -> None:
-        if self.serial.is_connected:
-            self.serial.disconnect()
-            self._stop_reader()
-            self._update_title()
-            self.notify("Disconnected")
-            return
         ports = SerialManager.list_ports()
         self.push_screen(PortScreen(ports), self._on_port_config)
+
+    def action_disconnect(self) -> None:
+        if not self.serial.is_connected:
+            self.notify("Not connected")
+            return
+        self.serial.disconnect()
+        self._stop_reader()
+        self._update_title()
+        self.notify("Disconnected")
 
     def _on_port_config(self, config: SerialConfig | None) -> None:
         if config is None:
