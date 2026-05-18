@@ -29,6 +29,15 @@ class TxHistoryScreen(Screen):
     #history-list {
         height: 1fr;
     }
+
+    #history-list > ListItem.odd {
+        background: $panel;
+    }
+
+    #history-list:focus > ListItem.-highlight {
+        background: #334155;
+        color: $text;
+    }
     """
 
     def __init__(self, history: list[tuple[str, bool]], *args, **kwargs) -> None:
@@ -49,6 +58,7 @@ class TxHistoryScreen(Screen):
                 mode = "HEX" if hex_mode else "ASC"
                 display = f"{mode}  {text}"
                 item = ListItem(Label(display), id=f"hist-{i}")
+                item.classes = "even" if i % 2 == 0 else "odd"
                 item._text = text
                 item._hex_mode = hex_mode
                 list_view.append(item)
