@@ -97,3 +97,4 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] History preserves HEX/ASCII mode per entry; cycling restores mode
 - [x] F2 opens scrollable history list (most recent first), select to re-transmit
 - [x] TX input auto-focuses on app launch
+- [x] History list: alternating row colors, HEX/ASC mode labels colored differently

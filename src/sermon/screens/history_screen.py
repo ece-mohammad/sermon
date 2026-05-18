@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rich.markup import escape as rich_escape
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.screen import Screen
@@ -56,7 +57,8 @@ class TxHistoryScreen(Screen):
         else:
             for i, (text, hex_mode) in enumerate(reversed(self._history)):
                 mode = "HEX" if hex_mode else "ASC"
-                display = f"{mode}  {text}"
+                color = "#e67e22" if hex_mode else "#3498db"
+                display = f"[{color}]{mode}[/]  {rich_escape(text)}"
                 item = ListItem(Label(display), id=f"hist-{i}")
                 item.classes = "even" if i % 2 == 0 else "odd"
                 item._text = text
