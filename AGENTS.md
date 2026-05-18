@@ -41,12 +41,12 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Basic textual `App` skeleton rendering a placeholder screen
 - [x] Verify `pip install -e .` works and `sermon` launches
 
-### M2 — Serial Layer + Live Display
-- [ ] `SerialManager` class wrapping pyserial (port enumerate, connect/disconnect, baud/parity/stopbits config)
-- [ ] Async read task pumping bytes into textual message stream
-- [ ] Port connection/disconnection UI (dropdown or screen)
-- [ ] Scrollable RX pane with ASCII/hex dump toggle
-- [ ] Live timestamping of received data
+### M2 — Serial Layer + Live Display ✓
+- [x] `SerialManager` class wrapping pyserial (port enumerate, connect/disconnect, baud/parity/stopbits config)
+- [x] Threaded read task pumping bytes into textual via `call_from_thread`
+- [x] Port connection/disconnection screen (ListView + baud Select + Connect button)
+- [x] Scrollable RX pane (RichLog-based) with ASCII/hex dump toggle via `^d`
+- [x] Live timestamping (`[HH:MM:SS.mmm]` prefix on each line)
 
 ### M3 — Protocol Data Model & Checksum Library
 - [ ] Implement checksum algorithms: LRC, MOD256, CRC-8, CRC-16, CRC-32
