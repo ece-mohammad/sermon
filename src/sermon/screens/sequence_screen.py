@@ -98,7 +98,7 @@ class SequenceEditorScreen(Screen):
         Binding("ctrl+r", "focus_fields", "Fields", show=False),
         Binding("ctrl+g", "focus_buttons", "Buttons", show=False),
         Binding("ctrl+s", "focus_save_row", "Save Row", show=False),
-        Binding("ctrl+f", "focus_done_row", "Done Row", show=False),
+        Binding("ctrl+f", "focus_done_row", "Done Row", priority=True, show=False),
     ]
 
     CSS = """
