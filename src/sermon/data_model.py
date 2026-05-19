@@ -86,3 +86,42 @@ def sequence_to_file(seq: SequenceDefinition, path: str) -> None:
 def sequence_from_file(path: str) -> SequenceDefinition:
     with open(path) as f:
         return sequence_from_json(f.read())
+
+
+@dataclass
+class TriggerRule:
+    name: str = ""
+    send_sequence: SequenceDefinition | None = None
+    receive_sequence: SequenceDefinition | None = None
+    active: bool = True
+
+
+def trigger_to_json(rule: TriggerRule, indent: int = 2) -> str:
+    d = {"name": rule.name, "active": rule.active}
+    if rule.send_sequence:
+        d["send_sequence"] = asdict(rule.send_sequence)
+    if rule.receive_sequence:
+        d["receive_sequence"] = asdict(rule.receive_sequence)
+    return json.dumps(d, indent=indent)
+
+
+def trigger_from_json(data: str) -> TriggerRule:
+    d = json.loads(data)
+    send = None
+    if "send_sequence" in d:
+        fields = [FieldDefinition(**f) for f in d["send_sequence"].get("fields", [])]
+        send = SequenceDefinition(
+            name=d["send_sequence"].get("name", ""), fields=fields
+        )
+    recv = None
+    if "receive_sequence" in d:
+        fields = [FieldDefinition(**f) for f in d["receive_sequence"].get("fields", [])]
+        recv = SequenceDefinition(
+            name=d["receive_sequence"].get("name", ""), fields=fields
+        )
+    return TriggerRule(
+        name=d.get("name", ""),
+        send_sequence=send,
+        receive_sequence=recv,
+        active=d.get("active", True),
+    )

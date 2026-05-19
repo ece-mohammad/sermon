@@ -8,10 +8,12 @@ from textual.binding import Binding
 from textual.containers import Horizontal
 from textual.widgets import Footer, Header, Input, Label
 
-from sermon.data_model import SequenceDefinition
+from sermon.data_model import SequenceDefinition, TriggerRule
+from sermon.matcher import SequenceMatcher
 from sermon.screens.history_screen import TxHistoryScreen
 from sermon.screens.port_screen import PortScreen
 from sermon.screens.sequence_screen import SequenceEditorScreen
+from sermon.screens.trigger_screen import TriggerEditorScreen
 from sermon.serial_manager import SerialConfig, SerialError, SerialManager
 from sermon.widgets.rx_pane import RxPane
 
@@ -149,6 +151,7 @@ class SermonApp(App):
         Binding("ctrl+e", "toggle_echo", "Echo", priority=True),
         Binding("f2", "show_history", "History", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
+        Binding("f4", "trigger_editor", "Triggers", priority=True),
     ]
 
     def __init__(self) -> None:
@@ -158,6 +161,9 @@ class SermonApp(App):
         self._tx_history: list[tuple[str, bool]] = []
         self._tx_history_index = -1
         self.tx_echo = True
+        self._sequences: list[SequenceDefinition] = []
+        self._trigger_rules: list[TriggerRule] = []
+        self._trigger_buffer = b""
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -295,7 +301,54 @@ class SermonApp(App):
 
     def _on_sequence_edit(self, result: SequenceDefinition | None) -> None:
         if result is not None:
+            for i, s in enumerate(self._sequences):
+                if s.name == result.name:
+                    self._sequences[i] = result
+                    break
+            else:
+                self._sequences.append(result)
             self.notify(f"Sequence '{result.name}' saved")
+
+    def action_trigger_editor(self) -> None:
+        self.push_screen(
+            TriggerEditorScreen(self._trigger_rules, self._sequences),
+            self._on_triggers_edit,
+        )
+
+    def _on_triggers_edit(self, result: list[TriggerRule] | None) -> None:
+        if result is not None:
+            self._trigger_rules = result
+            self._trigger_buffer = b""
+            n = sum(1 for r in result if r.active and r.receive_sequence is not None)
+            self.notify(f"{len(result)} trigger(s) saved, {n} active")
+
+    def _process_triggers(self, data: bytes) -> None:
+        self._trigger_buffer += data
+        for rule in self._trigger_rules:
+            if not rule.active or rule.receive_sequence is None:
+                continue
+            matcher = SequenceMatcher(rule.receive_sequence)
+            result = matcher.match(self._trigger_buffer)
+            if result is not None:
+                if rule.send_sequence is not None:
+                    tx_bytes = rule.send_sequence.resolve(result.captures)
+                    rx_pane = self.query_one(RxPane)
+                    try:
+                        self.serial.write(tx_bytes)
+                        if self.tx_echo:
+                            rx_pane.append_data(tx_bytes, datetime.now(), "TX")
+                        captures_str = ", ".join(
+                            f"{k}={v.hex(' ').upper()}"
+                            for k, v in result.captures.items()
+                        )
+                        self.notify(
+                            f"Trigger '{rule.name}' fired: TX {len(tx_bytes)}B "
+                            f"({captures_str})"
+                        )
+                    except SerialError as e:
+                        self.notify(str(e), severity="error")
+                self._trigger_buffer = result.remaining
+                break
 
     def action_toggle_hex(self) -> None:
         rx_pane = self.query_one(RxPane)
@@ -337,6 +390,7 @@ class SermonApp(App):
         rx_pane = self.query_one(RxPane)
         if rx_pane:
             rx_pane.append_data(data, timestamp, direction="RX")
+        self._process_triggers(data)
 
     def _update_status(self) -> None:
         label = self.query_one("#status-bar", Label)

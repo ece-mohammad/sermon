@@ -70,12 +70,12 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Inline validation (hex even-length, type constraints, etc.)
 - [x] Load/save sequences to/from JSON
 
-### M6 — Trigger / Automation Engine
-- [ ] `TriggerRule(send_sequence, receive_sequence)` model
-- [ ] On incoming chunk, try all active trigger patterns
-- [ ] On match: instantiate send sequence with captured values, queue for TX
+### M6 — Trigger / Automation Engine ✓
+- [x] `TriggerRule(send_sequence, receive_sequence)` model + JSON serialization
+- [x] On incoming chunk, try all active trigger patterns via `SequenceMatcher`
+- [x] On match: instantiate send sequence with captured values, queue for TX
+- [x] CRUD editor screen for trigger rules (F4, DataTable + detail pane)
 - [ ] Highlight matched regions in RX display
-- [ ] CRUD sidebar/modal for trigger rules
 
 ### M7 — Session Persistence
 - [ ] Save/load full session to JSON (port config, sequences, triggers, display mode)
@@ -92,7 +92,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] ASCII mode supports escape sequences: `\n`, `\r`, `\t`, `\\`, `\xHH`
 - [x] HEX mode in TX parses hex string from input
 - [x] Pytest pre-commit hook, pyproject.toml pytest config, dev dependencies
-- [x] 134 unit tests across checksum, data model, matcher, and CLI modules
+- [x] 148 unit tests across checksum, data model, matcher, CLI, and trigger modules
 - [x] Transmit history with up/down arrow navigation in TX input
 - [x] History preserves HEX/ASCII mode per entry; cycling restores mode
 - [x] F2 opens scrollable history list (most recent first), select to re-transmit
@@ -125,3 +125,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] TX history restores cursor position to end on cycle
 - [x] "Not connected" error notification on TX attempt
 - [x] Example `sequence.json` in repo root
+- [x] TriggerRule model + JSON serialization for trigger automation
+- [x] F4 trigger editor screen (DataTable + detail pane, add/remove/toggle)
+- [x] Trigger rules: on RX match, resolve send sequence with captures and transmit
+- [x] Automatic trigger buffer management with matched-byte removal
