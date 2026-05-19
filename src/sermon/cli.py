@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import subprocess
 from datetime import datetime
 
@@ -11,12 +12,14 @@ from textual.widgets import Footer, Header, Input, Label
 
 from sermon.data_model import SequenceDefinition, TriggerRule
 from sermon.matcher import SequenceMatcher
+from sermon.screens.help_screen import HelpScreen
 from sermon.screens.history_screen import TxHistoryScreen
 from sermon.screens.overview_screen import OverviewScreen
 from sermon.screens.port_screen import PortScreen
 from sermon.screens.sequence_screen import SequenceEditorScreen
 from sermon.screens.trigger_screen import TriggerEditorScreen
 from sermon.serial_manager import SerialConfig, SerialError, SerialManager
+from sermon.session import SessionData, load_session, save_session
 from sermon.widgets.rx_pane import RxPane
 
 _BYTESIZE_LABELS = {
@@ -75,6 +78,14 @@ def _unescape_ascii(text: str) -> bytes:
         result.append(ord(ch))
         i += 1
     return bytes(result)
+
+
+def _log_path() -> str:
+    from pathlib import Path
+
+    data_home = Path.home() / ".local" / "share" / "sermon"
+    data_home.mkdir(parents=True, exist_ok=True)
+    return str(data_home / "sermon.log")
 
 
 def _fmt_config(cfg: SerialConfig) -> str:
@@ -156,8 +167,9 @@ class SermonApp(App):
     BINDINGS = [
         Binding("ctrl+o", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
-        Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
+        Binding("ctrl+d", "toggle_hex", "Hex"),
         Binding("ctrl+e", "toggle_echo", "Echo", priority=True),
+        Binding("f1", "show_help", "Help", priority=True),
         Binding("f2", "show_history", "History", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
         Binding("f4", "trigger_editor", "Triggers", priority=True),
@@ -175,6 +187,27 @@ class SermonApp(App):
         self._sequences: list[SequenceDefinition] = []
         self._trigger_rules: list[TriggerRule] = []
         self._trigger_buffer = b""
+        self._saved_session: SessionData | None = load_session()
+        if self._saved_session is not None:
+            self._sequences = self._saved_session.sequences
+            self._trigger_rules = self._saved_session.trigger_rules
+            self._tx_history = self._saved_session.tx_history
+            self.tx_echo = self._saved_session.tx_echo
+
+    def _restore_session(self) -> None:
+        s = self._saved_session
+        if s is None:
+            return
+        rx_pane = self.query_one(RxPane)
+        rx_pane.hex_mode = s.hex_mode
+        self._update_mode_indicator()
+        if s.port_config and s.port_config.port:
+            try:
+                self.serial.connect(s.port_config)
+                self._start_reader()
+                self._update_status()
+            except SerialError:
+                pass
 
     def _screen_on_stack(self, screen_type: type) -> bool:
         return any(isinstance(s, screen_type) for s in self.screen_stack)
@@ -197,6 +230,7 @@ class SermonApp(App):
     def on_mount(self) -> None:
         self._update_status()
         self._update_mode_indicator()
+        self._restore_session()
         self.query_one("#tx-input", TxInput).focus()
 
     def action_connect_port(self) -> None:
@@ -214,6 +248,16 @@ class SermonApp(App):
 
     def action_quit(self) -> None:
         self.action_disconnect()
+        rx_pane = self.query_one(RxPane)
+        session = SessionData(
+            port_config=self.serial.config if self.serial.config.port else None,
+            sequences=self._sequences,
+            trigger_rules=self._trigger_rules,
+            hex_mode=rx_pane.hex_mode,
+            tx_echo=self.tx_echo,
+            tx_history=self._tx_history,
+        )
+        save_session(session)
         return super().action_quit()
 
     def _on_port_config(self, config: SerialConfig | None) -> None:
@@ -296,6 +340,11 @@ class SermonApp(App):
             rx_pane.hex_mode = hex_mode
             self._update_mode_indicator()
 
+    def action_show_help(self) -> None:
+        if self._screen_on_stack(HelpScreen):
+            return
+        self.push_screen(HelpScreen())
+
     def action_show_history(self) -> None:
         if self._screen_on_stack(TxHistoryScreen):
             return
@@ -351,9 +400,13 @@ class SermonApp(App):
             matcher = SequenceMatcher(rule.receive_sequence)
             result = matcher.match(self._trigger_buffer)
             if result is not None:
+                rx_pane = self.query_one(RxPane)
+                total_rx = rx_pane.rx_total_bytes
+                abs_start = total_rx - len(self._trigger_buffer) + result.match_start
+                abs_end = abs_start + len(result.matched_bytes)
+                rx_pane.add_match(abs_start, abs_end, rule.name)
                 if rule.send_sequence is not None:
                     tx_bytes = rule.send_sequence.resolve(result.captures)
-                    rx_pane = self.query_one(RxPane)
                     try:
                         self.serial.write(tx_bytes)
                         if self.tx_echo:
@@ -397,6 +450,9 @@ class SermonApp(App):
         self._update_mode_indicator()
         self.notify(f"TX echo {'on' if self.tx_echo else 'off'}")
 
+    def key_ctrl_d(self) -> None:
+        self.action_toggle_hex()
+
     def _start_reader(self) -> None:
         self._reader_worker = self.run_worker(
             self._read_loop,
@@ -415,13 +471,23 @@ class SermonApp(App):
             try:
                 data = self.serial.read(1024)
             except Exception:
+                self.call_from_thread(self._on_connection_lost)
                 break
             if data:
                 timestamp = datetime.now()
                 try:
                     self.call_from_thread(self._on_serial_data, data, timestamp)
                 except Exception:
+                    self.call_from_thread(self._on_connection_lost)
                     break
+        if not self.serial.is_connected:
+            self.call_from_thread(self._on_connection_lost)
+
+    def _on_connection_lost(self) -> None:
+        self._stop_reader()
+        self.serial.disconnect()
+        self._update_status()
+        self.notify("Connection lost", severity="error")
 
     def _on_serial_data(self, data: bytes, timestamp: datetime) -> None:
         rx_pane = self.query_one(RxPane)
@@ -451,5 +517,11 @@ class SermonApp(App):
 
 
 def main() -> None:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        filename=_log_path(),
+        filemode="a",
+    )
     app = SermonApp()
     app.run()

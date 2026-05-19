@@ -11,6 +11,7 @@ class MatchResult:
     captures: dict[str, bytes] = field(default_factory=dict)
     matched_bytes: bytes = b""
     remaining: bytes = b""
+    match_start: int = 0
 
 
 class SequenceMatcher:
@@ -49,6 +50,7 @@ class SequenceMatcher:
                 captures=dict(captures),
                 matched_bytes=matched,
                 remaining=data[end_pos:],
+                match_start=start,
             )
         return None
 

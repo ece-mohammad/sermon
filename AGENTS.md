@@ -75,24 +75,24 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] On incoming chunk, try all active trigger patterns via `SequenceMatcher`
 - [x] On match: instantiate send sequence with captured values, queue for TX
 - [x] CRUD editor screen for trigger rules (F4, DataTable + detail pane)
-- [ ] Highlight matched regions in RX display
+- [x] Highlight matched regions in RX display (blue bg on matched bytes)
 
-### M7 — Session Persistence
-- [ ] Save/load full session to JSON (port config, sequences, triggers, display mode)
-- [ ] Auto-save on exit, auto-restore on launch (opt-in)
+### M7 — Session Persistence ✓
+- [x] Save/load full session to JSON (port config, sequences, triggers, display mode, tx history, hex/echo state)
+- [x] Auto-save on exit, auto-restore on launch (in `~/.local/share/sermon/session.json`)
 
-### M8 — Polish
-- [ ] F1/? help screen listing all keybindings
-- [ ] Connection-loss detection and recovery/notification
-- [ ] File logging for debugging
-- [ ] Final verification: `pip install .` works and `sermon` launches
+### M8 — Polish ✓
+- [x] F1 help screen listing all keybindings
+- [x] Connection-loss detection and notification (error toast + status update)
+- [x] File logging for debugging (`~/.local/share/sermon/sermon.log`)
+- [x] Final verification: `pip install -e .` works and `sermon` launches
 
 ### Extra Features (ad-hoc, not in original plan)
 - [x] TX input field (text entry at bottom, Enter to send)
 - [x] ASCII mode supports escape sequences: `\n`, `\r`, `\t`, `\\`, `\xHH`
 - [x] HEX mode in TX parses hex string from input
 - [x] Pytest pre-commit hook, pyproject.toml pytest config, dev dependencies
-- [x] 148 unit tests across checksum, data model, matcher, CLI, and trigger modules
+- [x] 157 unit tests across checksum, data model, matcher, CLI, trigger, and session modules
 - [x] Transmit history with up/down arrow navigation in TX input
 - [x] History preserves HEX/ASCII mode per entry; cycling restores mode
 - [x] F2 opens scrollable history list (most recent first), select to re-transmit
@@ -142,3 +142,9 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Sequence editor: "Export"/"Import" buttons for JSON file I/O
 - [x] Sequence editor: buttons in 3 rows (field ops, persistence, close) for small terminal support
 - [x] Trigger editor: preserve row selection on add/remove/toggle/edit (same prevent pattern)
+- [x] MatchResult.match_start field for tracking match position in input buffer
+- [x] RX matched region highlighting with per-byte blue background (both HEX and ASCII modes)
+- [x] Session persistence: auto-save on exit, auto-restore on launch (~/.local/share/sermon/session.json)
+- [x] F1 help screen listing all keybindings
+- [x] Connection-loss detection with error notification
+- [x] File logging to ~/.local/share/sermon/sermon.log

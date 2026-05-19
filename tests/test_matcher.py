@@ -453,6 +453,16 @@ class TestMatchResultStructure:
         r = MatchResult()
         assert isinstance(r.remaining, bytes)
 
+    def test_match_start_default(self) -> None:
+        r = MatchResult()
+        assert r.match_start == 0
+
+    def test_match_start_reported(self) -> None:
+        fields = [FieldDefinition("a", "const", "AA")]
+        result = match(SequenceDefinition(fields=fields), bytes([0xFF, 0xAA]))
+        assert result is not None
+        assert result.match_start == 1
+
 
 class TestGreedyBacktracking:
     def test_wildcard_gives_back_for_trailing_const(self) -> None:
