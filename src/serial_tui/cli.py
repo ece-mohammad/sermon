@@ -202,13 +202,6 @@ class SermonApp(App):
         rx_pane = self.query_one(RxPane)
         rx_pane.hex_mode = s.hex_mode
         self._update_mode_indicator()
-        if s.port_config and s.port_config.port:
-            try:
-                self.serial.connect(s.port_config)
-                self._start_reader()
-                self._update_status()
-            except SerialError:
-                pass
 
     def _screen_on_stack(self, screen_type: type) -> bool:
         return any(isinstance(s, screen_type) for s in self.screen_stack)
@@ -236,7 +229,10 @@ class SermonApp(App):
 
     def action_connect_port(self) -> None:
         ports = SerialManager.list_ports()
-        self.push_screen(PortScreen(ports), self._on_port_config)
+        cfg = self.serial.config if self.serial.config.port else None
+        if cfg is None and self._saved_session is not None:
+            cfg = self._saved_session.port_config
+        self.push_screen(PortScreen(ports, initial_config=cfg), self._on_port_config)
 
     def action_disconnect(self) -> None:
         if not self.serial.is_connected:

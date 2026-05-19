@@ -116,18 +116,30 @@ class PortScreen(Screen):
     }
     """
 
-    def __init__(self, ports: list[dict], *args, **kwargs) -> None:
+    def __init__(
+        self,
+        ports: list[dict],
+        initial_config: SerialConfig | None = None,
+        *args,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self._ports = ports
+        self._initial_config = initial_config
 
     def compose(self) -> ComposeResult:
+        cfg = self._initial_config
+        baud = str(cfg.baudrate) if cfg else "115200"
+        data_val = cfg.bytesize if cfg else serial.EIGHTBITS
+        parity_val = cfg.parity if cfg else serial.PARITY_NONE
+        stop_val = cfg.stopbits if cfg else serial.STOPBITS_ONE
         yield Header(show_clock=True)
         yield Vertical(
             Label("Select Serial Port", id="port-label"),
             ListView(id="port-list"),
             Horizontal(
                 Label("Baud:"),
-                Input(value="115200", id="baud-input", type="integer"),
+                Input(value=baud, id="baud-input", type="integer"),
                 classes="config-row",
             ),
             Label(BAUD_HINT, id="baud-hint"),
@@ -135,7 +147,7 @@ class PortScreen(Screen):
                 Label("Data:"),
                 Select(
                     DATA_BITS,
-                    value=serial.EIGHTBITS,
+                    value=data_val,
                     id="data-select",
                     classes="config-select",
                 ),
@@ -145,7 +157,7 @@ class PortScreen(Screen):
                 Label("Parity:"),
                 Select(
                     PARITY_OPTIONS,
-                    value=serial.PARITY_NONE,
+                    value=parity_val,
                     id="parity-select",
                     classes="config-select",
                 ),
@@ -155,7 +167,7 @@ class PortScreen(Screen):
                 Label("Stop:"),
                 Select(
                     STOP_BITS,
-                    value=serial.STOPBITS_ONE,
+                    value=stop_val,
                     id="stop-select",
                     classes="config-select",
                 ),
@@ -171,11 +183,16 @@ class PortScreen(Screen):
         if not self._ports:
             list_view.append(ListItem(Label("No serial ports found")))
         else:
-            for p in self._ports:
+            for i, p in enumerate(self._ports):
                 label = f"{p['device']}"
                 if p["description"]:
                     label += f" — {p['description']}"
                 list_view.append(ListItem(Label(label)))
+            if self._initial_config and self._initial_config.port:
+                for i, p in enumerate(self._ports):
+                    if p["device"] == self._initial_config.port:
+                        list_view.index = i
+                        break
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         self.query_one("#baud-input", Input).focus()
