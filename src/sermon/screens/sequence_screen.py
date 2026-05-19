@@ -97,6 +97,8 @@ class SequenceEditorScreen(Screen):
         Binding("ctrl+n", "focus_name", "Name", show=False),
         Binding("ctrl+r", "focus_fields", "Fields", show=False),
         Binding("ctrl+g", "focus_buttons", "Buttons", show=False),
+        Binding("ctrl+s", "focus_save_row", "Save Row", show=False),
+        Binding("ctrl+f", "focus_done_row", "Done Row", show=False),
     ]
 
     CSS = """
@@ -514,6 +516,12 @@ class SequenceEditorScreen(Screen):
 
     def action_focus_buttons(self) -> None:
         self.query_one("#btn-add", Button).focus()
+
+    def action_focus_save_row(self) -> None:
+        self.query_one("#btn-save-mem", Button).focus()
+
+    def action_focus_done_row(self) -> None:
+        self.query_one("#btn-done", Button).focus()
 
     def _refresh_and_select(self, index: int | None) -> None:
         table = self.query_one("#field-table", DataTable)
