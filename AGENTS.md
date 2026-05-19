@@ -133,3 +133,5 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Ctrl+C clears TX input field
 - [x] Sequence editor loads field details on row highlight (up/down arrows)
 - [x] Sequence editor scope input: no crash on incomplete range, partial input preserved
+- [x] F5 overview screen (combined table of all sequences + triggers, edit/delete)
+- [x] Sequence editor: preserve field selection on edit/add/remove/reorder/load (prevent unwanted cursor reset)

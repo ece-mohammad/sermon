@@ -12,6 +12,7 @@ from textual.widgets import Footer, Header, Input, Label
 from sermon.data_model import SequenceDefinition, TriggerRule
 from sermon.matcher import SequenceMatcher
 from sermon.screens.history_screen import TxHistoryScreen
+from sermon.screens.overview_screen import OverviewScreen
 from sermon.screens.port_screen import PortScreen
 from sermon.screens.sequence_screen import SequenceEditorScreen
 from sermon.screens.trigger_screen import TriggerEditorScreen
@@ -160,6 +161,7 @@ class SermonApp(App):
         Binding("f2", "show_history", "History", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
         Binding("f4", "trigger_editor", "Triggers", priority=True),
+        Binding("f5", "overview", "Overview", priority=True),
         Binding("ctrl+y", "copy_rx", "Copy", priority=True),
     ]
 
@@ -339,6 +341,13 @@ class SermonApp(App):
             self._trigger_buffer = b""
             n = sum(1 for r in result if r.active and r.receive_sequence is not None)
             self.notify(f"{len(result)} trigger(s) saved, {n} active")
+
+    def action_overview(self) -> None:
+        if self._screen_on_stack(OverviewScreen):
+            return
+        self.push_screen(
+            OverviewScreen(self._sequences, self._trigger_rules),
+        )
 
     def _process_triggers(self, data: bytes) -> None:
         self._trigger_buffer += data

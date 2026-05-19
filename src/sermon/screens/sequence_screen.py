@@ -435,8 +435,7 @@ class SequenceEditorScreen(Screen):
         elif f.field_type == "wildcard":
             f.capture_name = detail_capture.value
 
-        self._refresh_table()
-        self._update_detail_state()
+        self._refresh_and_select(self._selected_index)
 
     def on_input_changed(self, event: Input.Changed) -> None:
         if event.input.id in (
@@ -490,13 +489,20 @@ class SequenceEditorScreen(Screen):
     def action_focus_buttons(self) -> None:
         self.query_one("#btn-add", Button).focus()
 
+    def _refresh_and_select(self, index: int | None) -> None:
+        table = self.query_one("#field-table", DataTable)
+        with self.prevent(DataTable.RowHighlighted):
+            self._refresh_table()
+            self._selected_index = index
+            if index is not None and 0 <= index < len(self._sequence.fields):
+                table.move_cursor(row=index)
+        self._update_detail_state()
+
     def _add_field(self) -> None:
         self._sequence.fields.append(
             FieldDefinition(name=f"field{len(self._sequence.fields)}")
         )
-        self._refresh_table()
-        self._selected_index = len(self._sequence.fields) - 1
-        self._update_detail_state()
+        self._refresh_and_select(len(self._sequence.fields) - 1)
 
     def _remove_field(self) -> None:
         if self._selected_index is None or self._selected_index >= len(
@@ -510,8 +516,7 @@ class SequenceEditorScreen(Screen):
                 if self._sequence.fields
                 else None
             )
-        self._refresh_table()
-        self._update_detail_state()
+        self._refresh_and_select(self._selected_index)
 
     def _move_field(self, direction: int) -> None:
         if self._selected_index is None:
@@ -523,8 +528,7 @@ class SequenceEditorScreen(Screen):
         fields = self._sequence.fields
         fields[idx], fields[new_idx] = fields[new_idx], fields[idx]
         self._selected_index = new_idx
-        self._refresh_table()
-        self._update_detail_state()
+        self._refresh_and_select(self._selected_index)
 
     def _save_sequence(self) -> None:
         def on_path(path: str) -> None:
@@ -554,7 +558,8 @@ class SequenceEditorScreen(Screen):
                 self._sequence = seq
                 self.query_one("#seq-name-input", Input).value = seq.name
                 self._selected_index = None
-                self._refresh_table()
+                with self.prevent(DataTable.RowHighlighted):
+                    self._refresh_table()
                 self._update_detail_state()
                 self.notify(f"Loaded from {path}")
             except (OSError, json.JSONDecodeError) as e:
