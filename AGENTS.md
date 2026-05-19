@@ -107,7 +107,6 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Re-render all existing data on hex/ASCII toggle (no data loss)
 - [x] Combined mode+echo indicator badge (`"ASCII Echo"` / `"HEX"`)
 - [x] Ctrl+K disconnect hotkey
-- [x] Ctrl+C clean shutdown with serial disconnect
 - [x] Escape key dismisses all modal screens
 - [x] Header with live clock on all screens
 - [x] Footer with auto-populated keybinding hints

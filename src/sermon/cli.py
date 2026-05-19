@@ -149,7 +149,6 @@ class SermonApp(App):
         Binding("ctrl+e", "toggle_echo", "Echo", priority=True),
         Binding("f2", "show_history", "History", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
-        Binding("ctrl+c", "quit", "Quit", priority=True),
     ]
 
     def __init__(self) -> None:
