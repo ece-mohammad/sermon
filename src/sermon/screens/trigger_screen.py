@@ -3,6 +3,7 @@ from __future__ import annotations
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
+from textual.events import ScreenResume
 from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Select
 
@@ -125,6 +126,9 @@ class TriggerEditorScreen(Screen):
         self._refresh_table()
         self._rebuild_selects()
         self._update_detail()
+
+    def on_screen_resume(self, event: ScreenResume) -> None:
+        self._rebuild_selects()
 
     def _rebuild_selects(self) -> None:
         choices = [("(none)", "")]
