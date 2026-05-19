@@ -99,7 +99,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] TX input auto-focuses on app launch
 - [x] History list: alternating row colors, HEX/ASC mode labels colored differently
 - [x] F3 opens sequence editor (DataTable field list, detail pane, load/save JSON)
-- [x] Sequence editor section shortcuts: ctrl+n (name), ctrl+r (fields), ctrl+o (detail), ctrl+g (buttons)
+- [x] Sequence editor section shortcuts: ctrl+n (name), ctrl+r (fields), ctrl+t (detail), ctrl+g (buttons)
 - [x] Port binding moved to ctrl+o (avoids conflict with Textual command palette on ctrl+p)
 - [x] RX/TX direction tags with color-coded display (green=RX, yellow=TX)
 - [x] TX echo toggle (ctrl+e) with on/off indicator in mode bar
@@ -129,3 +129,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] F4 trigger editor screen (DataTable + detail pane, add/remove/toggle)
 - [x] Trigger rules: on RX match, resolve send sequence with captures and transmit
 - [x] Automatic trigger buffer management with matched-byte removal
+- [x] Ctrl+Y copies RX log content to clipboard (via xclip)
+- [x] Ctrl+C clears TX input field
+- [x] Sequence editor loads field details on row highlight (up/down arrows)
+- [x] Sequence editor scope input: no crash on incomplete range, partial input preserved

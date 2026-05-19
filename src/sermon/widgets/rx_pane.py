@@ -97,3 +97,14 @@ class RxPane(RichLog):
         self.clear()
         for ts, data, direction in self._lines:
             self._emit_line(ts, data, direction)
+
+    def get_plain_text(self) -> str:
+        lines: list[str] = []
+        for ts, data, direction in self._lines:
+            line_ts = ts.strftime("%H:%M:%S.%f")[:-3]
+            if self.hex_mode:
+                display = data.hex(" ").upper()
+            else:
+                display = _fmt_ascii(data)
+            lines.append(f"[{line_ts}] [{direction}] {display}")
+        return "\n".join(lines)

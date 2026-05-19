@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from datetime import datetime
 
 import serial as pyserial
@@ -86,6 +87,7 @@ class TxInput(Input):
     BINDINGS = [
         Binding("up", "history_back", "", show=False),
         Binding("down", "history_forward", "", show=False),
+        Binding("ctrl+c", "clear_input", "", show=False),
     ]
 
     def action_history_back(self) -> None:
@@ -97,6 +99,12 @@ class TxInput(Input):
         app = self.app
         if hasattr(app, "_history_forward"):
             app._history_forward(self)
+
+    def action_clear_input(self) -> None:
+        self.clear()
+        app = self.app
+        if hasattr(app, "_tx_history_index"):
+            app._tx_history_index = -1
 
 
 class SermonApp(App):
@@ -152,6 +160,7 @@ class SermonApp(App):
         Binding("f2", "show_history", "History", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
         Binding("f4", "trigger_editor", "Triggers", priority=True),
+        Binding("ctrl+y", "copy_rx", "Copy", priority=True),
     ]
 
     def __init__(self) -> None:
@@ -354,6 +363,22 @@ class SermonApp(App):
         rx_pane = self.query_one(RxPane)
         rx_pane.hex_mode = not rx_pane.hex_mode
         self._update_mode_indicator()
+
+    def action_copy_rx(self) -> None:
+        rx_pane = self.query_one(RxPane)
+        text = rx_pane.get_plain_text()
+        if not text:
+            self.notify("Nothing to copy")
+            return
+        try:
+            p = subprocess.Popen(
+                ["xclip", "-selection", "clipboard"],
+                stdin=subprocess.PIPE,
+            )
+            p.communicate(text.encode("utf-8"))
+        except FileNotFoundError:
+            self.copy_to_clipboard(text)
+        self.notify(f"Copied {len(text)} characters")
 
     def action_toggle_echo(self) -> None:
         self.tx_echo = not self.tx_echo

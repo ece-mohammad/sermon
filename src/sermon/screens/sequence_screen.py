@@ -65,7 +65,8 @@ def _parse_scope(value: str) -> list[int]:
             continue
         if "-" in p:
             a, b = p.split("-", 1)
-            indices.extend(range(int(a.strip()), int(b.strip()) + 1))
+            if a.strip() and b.strip():
+                indices.extend(range(int(a.strip()), int(b.strip()) + 1))
         else:
             indices.append(int(p))
     return indices
@@ -95,7 +96,7 @@ class SequenceEditorScreen(Screen):
         Binding("escape", "dismiss", "Cancel"),
         Binding("ctrl+n", "focus_name", "Name", show=False),
         Binding("ctrl+r", "focus_fields", "Fields", show=False),
-        Binding("ctrl+o", "focus_detail", "Detail", show=False),
+        Binding("ctrl+t", "focus_detail", "Detail", show=False),
         Binding("ctrl+g", "focus_buttons", "Buttons", show=False),
     ]
 
@@ -360,7 +361,8 @@ class SequenceEditorScreen(Screen):
             detail_checksum.disabled = False
             detail_checksum.value = f.checksum_algorithm
             detail_scope.disabled = False
-            detail_scope.value = _format_scope(f.checksum_scope)
+            if not detail_scope.value:
+                detail_scope.value = _format_scope(f.checksum_scope)
             detail_capture.disabled = False
             detail_capture.value = f.capture_name
             val_msg.update("")
@@ -379,10 +381,16 @@ class SequenceEditorScreen(Screen):
 
         self._updating_detail = False
 
+    def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
+        if event.row_key is not None:
+            self._selected_index = int(str(event.row_key.value))
+            self._update_detail_state()
+
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
         if event.row_key is not None:
             self._selected_index = int(str(event.row_key.value))
             self._update_detail_state()
+            self.query_one("#detail-name", Input).focus()
 
     def _on_detail_changed(self) -> None:
         if self._updating_detail:
@@ -421,7 +429,8 @@ class SequenceEditorScreen(Screen):
         elif f.field_type == "checksum":
             algo = str(detail_checksum.value) if detail_checksum.value else ""
             f.checksum_algorithm = algo
-            f.checksum_scope = _parse_scope(detail_scope.value)
+            if _validate_scope(detail_scope.value):
+                f.checksum_scope = _parse_scope(detail_scope.value)
             f.capture_name = detail_capture.value
         elif f.field_type == "wildcard":
             f.capture_name = detail_capture.value
