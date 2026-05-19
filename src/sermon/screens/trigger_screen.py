@@ -87,7 +87,7 @@ class TriggerEditorScreen(Screen):
         yield Header(show_clock=True)
         yield Vertical(
             Label("Trigger Rules", id="trigger-label"),
-            DataTable(id="trigger-table"),
+            DataTable(id="trigger-table", cursor_type="row"),
             self._detail_pane(),
             Horizontal(
                 Button("Add", id="add-btn", variant="primary"),
@@ -176,10 +176,12 @@ class TriggerEditorScreen(Screen):
             self.dismiss(self._rules)
         elif event.button.id == "add-btn":
             self._rules.append(TriggerRule(name=f"Rule {len(self._rules) + 1}"))
+            self._selected_idx = len(self._rules) - 1
             self._refresh_table()
             table = self.query_one("#trigger-table", DataTable)
             table.focus()
-            table.move_cursor(row=len(self._rules) - 1)
+            table.move_cursor(row=self._selected_idx)
+            self._update_detail()
         elif event.button.id == "remove-btn":
             self.action_remove_trigger()
         elif event.button.id == "toggle-btn":
