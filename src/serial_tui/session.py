@@ -7,14 +7,14 @@ from pathlib import Path
 
 import serial as pyserial
 
-from sermon.data_model import (
+from serial_tui.data_model import (
     SequenceDefinition,
     TriggerRule,
     sequence_from_json,
     trigger_from_json,
     trigger_to_json,
 )
-from sermon.serial_manager import SerialConfig
+from serial_tui.serial_manager import SerialConfig
 
 _BYTESIZE_TO_LABEL = {
     pyserial.FIVEBITS: "5",
@@ -54,8 +54,8 @@ class SessionData:
 def _session_dir() -> Path:
     base = os.environ.get("XDG_DATA_HOME")
     if base:
-        return Path(base) / "sermon"
-    return Path.home() / ".local" / "share" / "sermon"
+        return Path(base) / "serial-tui"
+    return Path.home() / ".local" / "share" / "serial-tui"
 
 
 def _session_path() -> Path:

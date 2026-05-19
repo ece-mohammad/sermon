@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from sermon.cli import _unescape_ascii
-from sermon.serial_manager import SerialError
+from serial_tui.cli import _unescape_ascii
+from serial_tui.serial_manager import SerialError
 
 
 def _parse_tx_input(text: str, hex_mode: bool) -> bytes:
@@ -119,7 +119,7 @@ class TestParseTxInput:
 
 class TestSerialManagerWrite:
     def test_write_success(self) -> None:
-        from sermon.serial_manager import SerialManager
+        from serial_tui.serial_manager import SerialManager
 
         sm = SerialManager()
         sm._serial = MagicMock()
@@ -130,7 +130,7 @@ class TestSerialManagerWrite:
         sm._serial.write.assert_called_once_with(b"hello")
 
     def test_write_not_connected(self) -> None:
-        from sermon.serial_manager import SerialManager
+        from serial_tui.serial_manager import SerialManager
 
         sm = SerialManager()
         sm._serial = None
@@ -141,7 +141,7 @@ class TestSerialManagerWrite:
     def test_write_serial_error(self) -> None:
         import serial
 
-        from sermon.serial_manager import SerialManager
+        from serial_tui.serial_manager import SerialManager
 
         sm = SerialManager()
         sm._serial = MagicMock()

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sermon"
+name = "serial-tui"
 version = "1.0.0"
 description = "A serial monitor TUI with protocol testing capabilities"
 readme = "README.md"
@@ -20,7 +20,7 @@ dev = [
 ]
 
 [project.scripts]
-sermon = "sermon.cli:main"
+serial-tui = "serial_tui.cli:main"
 
 [tool.black]
 line-length = 88

@@ -1,13 +1,13 @@
 import json
 
-from sermon.data_model import (
+from serial_tui.data_model import (
     FieldDefinition,
     SequenceDefinition,
     TriggerRule,
     trigger_from_json,
     trigger_to_json,
 )
-from sermon.matcher import SequenceMatcher
+from serial_tui.matcher import SequenceMatcher
 
 
 class TestTriggerRule:
@@ -129,7 +129,7 @@ class TestTriggerMatching:
         assert result is None
 
     def test_trigger_checksum_verify_reject(self) -> None:
-        from sermon.checksum import compute
+        from serial_tui.checksum import compute
 
         body = bytes([0x01, 0x02])
         scope_data = bytes([0xAA]) + body

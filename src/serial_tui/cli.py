@@ -10,17 +10,17 @@ from textual.binding import Binding
 from textual.containers import Horizontal
 from textual.widgets import Footer, Header, Input, Label
 
-from sermon.data_model import SequenceDefinition, TriggerRule
-from sermon.matcher import SequenceMatcher
-from sermon.screens.help_screen import HelpScreen
-from sermon.screens.history_screen import TxHistoryScreen
-from sermon.screens.overview_screen import OverviewScreen
-from sermon.screens.port_screen import PortScreen
-from sermon.screens.sequence_screen import SequenceEditorScreen
-from sermon.screens.trigger_screen import TriggerEditorScreen
-from sermon.serial_manager import SerialConfig, SerialError, SerialManager
-from sermon.session import SessionData, load_session, save_session
-from sermon.widgets.rx_pane import RxPane
+from serial_tui.data_model import SequenceDefinition, TriggerRule
+from serial_tui.matcher import SequenceMatcher
+from serial_tui.screens.help_screen import HelpScreen
+from serial_tui.screens.history_screen import TxHistoryScreen
+from serial_tui.screens.overview_screen import OverviewScreen
+from serial_tui.screens.port_screen import PortScreen
+from serial_tui.screens.sequence_screen import SequenceEditorScreen
+from serial_tui.screens.trigger_screen import TriggerEditorScreen
+from serial_tui.serial_manager import SerialConfig, SerialError, SerialManager
+from serial_tui.session import SessionData, load_session, save_session
+from serial_tui.widgets.rx_pane import RxPane
 
 _BYTESIZE_LABELS = {
     pyserial.FIVEBITS: "5",
@@ -83,9 +83,9 @@ def _unescape_ascii(text: str) -> bytes:
 def _log_path() -> str:
     from pathlib import Path
 
-    data_home = Path.home() / ".local" / "share" / "sermon"
+    data_home = Path.home() / ".local" / "share" / "serial-tui"
     data_home.mkdir(parents=True, exist_ok=True)
-    return str(data_home / "sermon.log")
+    return str(data_home / "serial-tui.log")
 
 
 def _fmt_config(cfg: SerialConfig) -> str:

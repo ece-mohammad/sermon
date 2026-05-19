@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 import serial as pyserial
 
-from sermon.data_model import FieldDefinition, SequenceDefinition, TriggerRule
-from sermon.serial_manager import SerialConfig
-from sermon.session import (
+from serial_tui.data_model import FieldDefinition, SequenceDefinition, TriggerRule
+from serial_tui.serial_manager import SerialConfig
+from serial_tui.session import (
     SessionData,
     load_session,
     save_session,
@@ -106,8 +106,8 @@ class TestSessionRoundtrip:
 class TestSessionFileIO:
     def test_save_and_load(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            session_path = Path(tmpdir) / "sermon" / "session.json"
-            with patch("sermon.session._session_path", return_value=session_path):
+            session_path = Path(tmpdir) / "serial-tui" / "session.json"
+            with patch("serial_tui.session._session_path", return_value=session_path):
                 s = SessionData(
                     port_config=SerialConfig(port="/dev/ttyAMA0", baudrate=57600),
                     hex_mode=True,
@@ -132,16 +132,16 @@ class TestSessionFileIO:
     def test_load_nonexistent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             session_path = Path(tmpdir) / "nonexistent" / "session.json"
-            with patch("sermon.session._session_path", return_value=session_path):
+            with patch("serial_tui.session._session_path", return_value=session_path):
                 result = load_session()
                 assert result is None
 
     def test_load_corrupted(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            session_path = Path(tmpdir) / "sermon" / "session.json"
+            session_path = Path(tmpdir) / "serial-tui" / "session.json"
             session_path.parent.mkdir(parents=True)
             session_path.write_text("{invalid json}")
-            with patch("sermon.session._session_path", return_value=session_path):
+            with patch("serial_tui.session._session_path", return_value=session_path):
                 result = load_session()
                 assert result is None
 

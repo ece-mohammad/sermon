@@ -16,7 +16,7 @@ from textual.widgets import (
     Select,
 )
 
-from sermon.serial_manager import SerialConfig
+from serial_tui.serial_manager import SerialConfig
 
 BAUD_RATES = [
     300,

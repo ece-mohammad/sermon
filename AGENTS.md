@@ -1,4 +1,4 @@
-Project: sermon — compact agent notes
+Project: serial-tui — compact agent notes
 
 What matters (only the non-obvious bits an agent would otherwise guess wrong)
 
@@ -6,8 +6,8 @@ What matters (only the non-obvious bits an agent would otherwise guess wrong)
   - A .venv exists at the repo root. Prefer activating it: `source .venv/bin/activate` (POSIX) or use the matching Python 3.13 interpreter.
 
 - How to run the program quickly (no install required):
-  - Run the script directly: `python src/sermon/cli.py`
-  - If you prefer module-style execution without installing the package, use: `PYTHONPATH=src python -m sermon.cli`.
+  - Run the script directly: `python src/serial_tui/cli.py`
+  - If you prefer module-style execution without installing the package, use: `PYTHONPATH=src python -m serial_tui.cli`.
 
 - Dependencies:
   - Declared in pyproject.toml: `crccheck>=1.3`, `pyserial>=3.5`, `textual>=8.2.6`.
@@ -17,12 +17,12 @@ What matters (only the non-obvious bits an agent would otherwise guess wrong)
 - Packaging: hatchling build-system is configured. `pip install -e .` or `uv pip install -e .` works.
 
 - Project layout and imports:
-  - This repo uses a src/ layout. If you need to import sermon as a package for tests or REPL, either install the package properly or run with `PYTHONPATH=src` so `import sermon` resolves.
+  - This repo uses a src/ layout. If you need to import serial_tui as a package for tests or REPL, either install the package properly or run with `PYTHONPATH=src` so `import serial_tui` resolves.
   - Pre-commit hooks: isort, black, flake8, pytest. Run `pre-commit install` if hooks are missing.
 
 - Tests / tooling:
   - Unit tests use `pytest`. Run with: `.venv/bin/python -m pytest tests/ -v` (no `PYTHONPATH` needed — it's configured in `pyproject.toml`).
-  - Test files live in `tests/` and mirror `src/sermon/` package structure.
+  - Test files live in `tests/` and mirror `src/serial_tui/` package structure.
   - Always add or update tests in the same commit as the code they cover.
 
 - Local environment notes:
@@ -36,10 +36,10 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 
 ### M1 — Foundation ✓
 - [x] Add hatchling `[build-system]` to `pyproject.toml`
-- [x] Create `src/sermon/__init__.py` and `src/sermon/cli.py` with `def main():`
-- [x] Add `[project.scripts]` entry_point → `sermon.cli:main`
+- [x] Create `src/serial_tui/__init__.py` and `src/serial_tui/cli.py` with `def main():`
+- [x] Add `[project.scripts]` entry_point → `serial_tui.cli:main`
 - [x] Basic textual `App` skeleton rendering a placeholder screen
-- [x] Verify `pip install -e .` works and `sermon` launches
+- [x] Verify `pip install -e .` works and `serial-tui` launches
 
 ### M2 — Serial Layer + Live Display ✓
 - [x] `SerialManager` class wrapping pyserial (port enumerate, connect/disconnect, baud/parity/stopbits config)
@@ -79,13 +79,13 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 
 ### M7 — Session Persistence ✓
 - [x] Save/load full session to JSON (port config, sequences, triggers, display mode, tx history, hex/echo state)
-- [x] Auto-save on exit, auto-restore on launch (in `~/.local/share/sermon/session.json`)
+- [x] Auto-save on exit, auto-restore on launch (in `~/.local/share/serial-tui/session.json`)
 
 ### M8 — Polish ✓
 - [x] F1 help screen listing all keybindings
 - [x] Connection-loss detection and notification (error toast + status update)
-- [x] File logging for debugging (`~/.local/share/sermon/sermon.log`)
-- [x] Final verification: `pip install -e .` works and `sermon` launches
+- [x] File logging for debugging (`~/.local/share/serial-tui/serial-tui.log`)
+- [x] Final verification: `pip install -e .` works and `serial-tui` launches
 
 ### Extra Features (ad-hoc, not in original plan)
 - [x] TX input field (text entry at bottom, Enter to send)
@@ -144,10 +144,10 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Trigger editor: preserve row selection on add/remove/toggle/edit (same prevent pattern)
 - [x] MatchResult.match_start field for tracking match position in input buffer
 - [x] RX matched region highlighting with per-byte blue background (both HEX and ASCII modes)
-- [x] Session persistence: auto-save on exit, auto-restore on launch (~/.local/share/sermon/session.json)
+- [x] Session persistence: auto-save on exit, auto-restore on launch (~/.local/share/serial-tui/session.json)
 - [x] F1 help screen listing all keybindings
 - [x] Connection-loss detection with error notification
-- [x] File logging to ~/.local/share/sermon/sermon.log
+- [x] File logging to ~/.local/share/serial-tui/serial-tui.log
 - [x] Help shortcut: `?` key (F1 removed — intercepted by terminals)
 - [x] Ctrl+L clears RX display
 - [x] Notification toast on mode toggle (HEX/ASCII) and echo toggle

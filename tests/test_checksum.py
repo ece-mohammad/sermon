@@ -1,6 +1,6 @@
 import pytest
 
-from sermon.checksum import (
+from serial_tui.checksum import (
     checksum_size,
     compute,
     compute_crc8,

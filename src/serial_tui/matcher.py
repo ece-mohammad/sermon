@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from sermon.checksum import checksum_size, compute
-from sermon.data_model import FieldDefinition, SequenceDefinition
+from serial_tui.checksum import checksum_size, compute
+from serial_tui.data_model import FieldDefinition, SequenceDefinition
 
 
 @dataclass

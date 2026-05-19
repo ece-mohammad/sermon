@@ -7,9 +7,9 @@ from textual.events import ScreenResume
 from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Label
 
-from sermon.data_model import SequenceDefinition, TriggerRule
-from sermon.screens.sequence_screen import SequenceEditorScreen
-from sermon.screens.trigger_screen import TriggerEditorScreen
+from serial_tui.data_model import SequenceDefinition, TriggerRule
+from serial_tui.screens.sequence_screen import SequenceEditorScreen
+from serial_tui.screens.trigger_screen import TriggerEditorScreen
 
 
 class OverviewScreen(Screen):

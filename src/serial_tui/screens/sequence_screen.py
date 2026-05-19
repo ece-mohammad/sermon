@@ -8,8 +8,8 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Select
 
-from sermon.checksum import list_algorithms
-from sermon.data_model import FieldDefinition, SequenceDefinition
+from serial_tui.checksum import list_algorithms
+from serial_tui.data_model import FieldDefinition, SequenceDefinition
 
 FIELD_TYPES = [
     ("const", "const"),
@@ -583,7 +583,7 @@ class SequenceEditorScreen(Screen):
             if not path:
                 return
             try:
-                from sermon.data_model import sequence_to_file
+                from serial_tui.data_model import sequence_to_file
 
                 self._sequence.name = self.query_one("#seq-name-input", Input).value
                 sequence_to_file(self._sequence, path)
@@ -599,7 +599,7 @@ class SequenceEditorScreen(Screen):
             if not path:
                 return
             try:
-                from sermon.data_model import sequence_from_file
+                from serial_tui.data_model import sequence_from_file
 
                 seq = sequence_from_file(path)
                 self._sequence = seq

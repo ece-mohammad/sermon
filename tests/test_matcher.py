@@ -1,6 +1,6 @@
-from sermon.checksum import compute
-from sermon.data_model import FieldDefinition, SequenceDefinition
-from sermon.matcher import MatchResult, SequenceMatcher
+from serial_tui.checksum import compute
+from serial_tui.data_model import FieldDefinition, SequenceDefinition
+from serial_tui.matcher import MatchResult, SequenceMatcher
 
 
 def make_matcher(*fields: FieldDefinition) -> SequenceMatcher:

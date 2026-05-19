@@ -20,7 +20,7 @@ class FieldDefinition:
 
     def byte_length(self) -> int:
         if self.field_type == "checksum":
-            from sermon.checksum import checksum_size
+            from serial_tui.checksum import checksum_size
 
             return checksum_size(self.checksum_algorithm)
         if self.field_type == "const":
@@ -35,7 +35,7 @@ class FieldDefinition:
             val = self.value.replace(" ", "").replace("\t", "")
             return bytes.fromhex(val)
         if self.field_type == "checksum":
-            from sermon.checksum import compute
+            from serial_tui.checksum import compute
 
             if captures and self.capture_name in captures:
                 scope_data = captures[self.capture_name]

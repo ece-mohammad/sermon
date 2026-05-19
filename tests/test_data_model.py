@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from sermon.data_model import (
+from serial_tui.data_model import (
     FieldDefinition,
     SequenceDefinition,
     sequence_from_file,
@@ -66,7 +66,7 @@ class TestFieldDefinition:
         assert f.resolve_bytes() == b""
 
     def test_checksum_resolve_with_scope(self) -> None:
-        from sermon.checksum import compute
+        from serial_tui.checksum import compute
 
         f = FieldDefinition(
             name="crc",
@@ -79,7 +79,7 @@ class TestFieldDefinition:
         assert result == expected
 
     def test_checksum_resolve_no_captures(self) -> None:
-        from sermon.checksum import compute
+        from serial_tui.checksum import compute
 
         f = FieldDefinition(
             name="crc",
@@ -108,7 +108,7 @@ class TestSequenceDefinition:
         assert seq.resolve() == bytes([0xAA, 0xBB])
 
     def test_resolve_with_captures(self) -> None:
-        from sermon.checksum import compute
+        from serial_tui.checksum import compute
 
         fields = [
             FieldDefinition(name="sof", field_type="const", value="AA"),
