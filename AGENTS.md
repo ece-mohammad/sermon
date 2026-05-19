@@ -99,7 +99,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] TX input auto-focuses on app launch
 - [x] History list: alternating row colors, HEX/ASC mode labels colored differently
 - [x] F3 opens sequence editor (DataTable field list, detail pane, load/save JSON)
-- [x] Sequence editor section shortcuts: ctrl+n (name), ctrl+r (fields), ctrl+g (buttons), ctrl+s (save row), ctrl+f (done row)
+- [x] Sequence editor section shortcuts: ctrl+n (name), ctrl+r (fields), ctrl+g (buttons), ctrl+s (save row), ctrl+d (done row)
 - [x] Port binding moved to ctrl+o (avoids conflict with Textual command palette on ctrl+p)
 - [x] RX/TX direction tags with color-coded display (green=RX, yellow=TX)
 - [x] TX echo toggle (ctrl+e) with on/off indicator in mode bar
