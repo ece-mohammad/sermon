@@ -174,6 +174,9 @@ class SermonApp(App):
         self._trigger_rules: list[TriggerRule] = []
         self._trigger_buffer = b""
 
+    def _screen_on_stack(self, screen_type: type) -> bool:
+        return any(isinstance(s, screen_type) for s in self.screen_stack)
+
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
         yield Horizontal(
@@ -292,6 +295,8 @@ class SermonApp(App):
             self._update_mode_indicator()
 
     def action_show_history(self) -> None:
+        if self._screen_on_stack(TxHistoryScreen):
+            return
         self.push_screen(TxHistoryScreen(self._tx_history), self._on_history_selected)
 
     def _on_history_selected(self, result: tuple[str, bool] | None) -> None:
@@ -303,6 +308,8 @@ class SermonApp(App):
         self.query_one("#tx-input", TxInput).focus()
 
     def action_sequence_editor(self) -> None:
+        if self._screen_on_stack(SequenceEditorScreen):
+            return
         self.push_screen(
             SequenceEditorScreen(),
             self._on_sequence_edit,
@@ -319,6 +326,8 @@ class SermonApp(App):
             self.notify(f"Sequence '{result.name}' saved")
 
     def action_trigger_editor(self) -> None:
+        if self._screen_on_stack(TriggerEditorScreen):
+            return
         self.push_screen(
             TriggerEditorScreen(self._trigger_rules, self._sequences),
             self._on_triggers_edit,
