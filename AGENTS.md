@@ -103,3 +103,26 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Port binding moved to ctrl+o (avoids conflict with Textual command palette on ctrl+p)
 - [x] RX/TX direction tags with color-coded display (green=RX, yellow=TX)
 - [x] TX echo toggle (ctrl+e) with on/off indicator in mode bar
+- [x] Control character names in ASCII mode (`<NUL>`, `<LF>`, `<DEL>`, etc.)
+- [x] Re-render all existing data on hex/ASCII toggle (no data loss)
+- [x] Combined mode+echo indicator badge (`"ASCII Echo"` / `"HEX"`)
+- [x] Ctrl+K disconnect hotkey
+- [x] Ctrl+C clean shutdown with serial disconnect
+- [x] Escape key dismisses all modal screens
+- [x] Header with live clock on all screens
+- [x] Footer with auto-populated keybinding hints
+- [x] Connected/disconnected status bar visual styling (green/muted)
+- [x] Custom free-text baud rate input (with common-rate hint)
+- [x] Full serial config: data bits (5/6/7/8), parity (incl. Mark/Space), stop bits (1/1.5/2)
+- [x] Port list shows device descriptions; empty ports state handled
+- [x] Auto-focus baud input after port selection
+- [x] Sequence editor: Up/Down field reorder buttons
+- [x] Sequence editor: File path input modal for Save/Load
+- [x] Sequence editor: Auto-disable irrelevant detail fields by type
+- [x] Sequence editor: Inline validation error messages
+- [x] Sequence editor: Scope format with range syntax (`0-2,5,7-9`)
+- [x] Graceful connection-loss handling on serial read error
+- [x] Duplicate consecutive TX entry prevention
+- [x] TX history restores cursor position to end on cycle
+- [x] "Not connected" error notification on TX attempt
+- [x] Example `sequence.json` in repo root
