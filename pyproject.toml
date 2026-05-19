@@ -34,3 +34,8 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-v"
 filterwarnings = ["error"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
