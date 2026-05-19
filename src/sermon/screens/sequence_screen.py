@@ -96,7 +96,6 @@ class SequenceEditorScreen(Screen):
         Binding("escape", "dismiss", "Cancel"),
         Binding("ctrl+n", "focus_name", "Name", show=False),
         Binding("ctrl+r", "focus_fields", "Fields", show=False),
-        Binding("ctrl+t", "focus_detail", "Detail", show=False),
         Binding("ctrl+g", "focus_buttons", "Buttons", show=False),
     ]
 
