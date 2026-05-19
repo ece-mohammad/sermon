@@ -63,6 +63,10 @@ class HelpScreen(Screen):
                     "  Ctrl+Y                Copy RX content to clipboard",
                     classes="help-key",
                 ),
+                Label(
+                    "  Ctrl+L                Clear RX display",
+                    classes="help-key",
+                ),
                 Label(""),
                 Label("TX Input", classes="help-section"),
                 Label("  Enter                 Send data", classes="help-key"),
@@ -70,8 +74,8 @@ class HelpScreen(Screen):
                 Label("  Ctrl+C                Clear input field", classes="help-key"),
                 Label(""),
                 Label("Screens", classes="help-section"),
-                Label("  F1                    This help screen", classes="help-key"),
-                Label("  F2                    TX history list", classes="help-key"),
+                Label("  ?                     This help screen", classes="help-key"),
+                Label("  Ctrl+T                TX history list", classes="help-key"),
                 Label("  F3                    Sequence editor", classes="help-key"),
                 Label("  F4                    Trigger editor", classes="help-key"),
                 Label(

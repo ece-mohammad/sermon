@@ -167,14 +167,15 @@ class SermonApp(App):
     BINDINGS = [
         Binding("ctrl+o", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
-        Binding("ctrl+d", "toggle_hex", "Hex"),
+        Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
         Binding("ctrl+e", "toggle_echo", "Echo", priority=True),
-        Binding("f1", "show_help", "Help", priority=True),
-        Binding("f2", "show_history", "History", priority=True),
+        Binding("ctrl+y", "copy_rx", "Copy", priority=True),
+        Binding("ctrl+l", "clear_rx", "Clear", priority=True),
+        Binding("ctrl+t", "show_history", "History", priority=True),
+        Binding("?", "show_help", "Help", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
         Binding("f4", "trigger_editor", "Triggers", priority=True),
         Binding("f5", "overview", "Overview", priority=True),
-        Binding("ctrl+y", "copy_rx", "Copy", priority=True),
     ]
 
     def __init__(self) -> None:
@@ -428,6 +429,7 @@ class SermonApp(App):
         rx_pane = self.query_one(RxPane)
         rx_pane.hex_mode = not rx_pane.hex_mode
         self._update_mode_indicator()
+        self.notify(f"Mode: {'HEX' if rx_pane.hex_mode else 'ASCII'}")
 
     def action_copy_rx(self) -> None:
         rx_pane = self.query_one(RxPane)
@@ -445,13 +447,18 @@ class SermonApp(App):
             self.copy_to_clipboard(text)
         self.notify(f"Copied {len(text)} characters")
 
+    def action_clear_rx(self) -> None:
+        rx_pane = self.query_one(RxPane)
+        rx_pane._lines.clear()
+        rx_pane._stream.clear()
+        rx_pane._matches.clear()
+        rx_pane.clear()
+        self.notify("RX display cleared")
+
     def action_toggle_echo(self) -> None:
         self.tx_echo = not self.tx_echo
         self._update_mode_indicator()
         self.notify(f"TX echo {'on' if self.tx_echo else 'off'}")
-
-    def key_ctrl_d(self) -> None:
-        self.action_toggle_hex()
 
     def _start_reader(self) -> None:
         self._reader_worker = self.run_worker(
