@@ -198,10 +198,15 @@ class SequenceEditorScreen(Screen):
     """
 
     def __init__(
-        self, sequence: SequenceDefinition | None = None, *args, **kwargs
+        self,
+        sequence: SequenceDefinition | None = None,
+        sequences: list[SequenceDefinition] | None = None,
+        *args,
+        **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self._sequence = sequence or SequenceDefinition(name="NewSequence")
+        self._sequences = sequences
         self._selected_index: int | None = None
         self._updating_detail = False
 
@@ -225,9 +230,10 @@ class SequenceEditorScreen(Screen):
                 Button("Remove", id="btn-remove", variant="error"),
                 Button("▲ Up", id="btn-up"),
                 Button("▼ Down", id="btn-down"),
+                Button("Save", id="btn-save-mem", variant="primary"),
                 Button("Save...", id="btn-save"),
                 Button("Load...", id="btn-load"),
-                Button("Done", id="btn-done", variant="primary"),
+                Button("Done", id="btn-done", variant="success"),
                 id="button-row",
             ),
             id="seq-content",
@@ -460,6 +466,8 @@ class SequenceEditorScreen(Screen):
             self._move_field(-1)
         elif btn == "btn-down":
             self._move_field(1)
+        elif btn == "btn-save-mem":
+            self._save_in_memory()
         elif btn == "btn-save":
             self._save_sequence()
         elif btn == "btn-load":
@@ -530,6 +538,19 @@ class SequenceEditorScreen(Screen):
         self._selected_index = new_idx
         self._refresh_and_select(self._selected_index)
 
+    def _save_in_memory(self) -> None:
+        if self._sequences is None:
+            self.notify("No sequence list available to save to", severity="error")
+            return
+        self._sequence.name = self.query_one("#seq-name-input", Input).value
+        for i, s in enumerate(self._sequences):
+            if s.name == self._sequence.name:
+                self._sequences[i] = self._sequence
+                break
+        else:
+            self._sequences.append(self._sequence)
+        self.notify(f"Sequence '{self._sequence.name}' saved")
+
     def _save_sequence(self) -> None:
         def on_path(path: str) -> None:
             path = path.strip()
@@ -569,6 +590,7 @@ class SequenceEditorScreen(Screen):
 
     def _finish(self) -> None:
         self._sequence.name = self.query_one("#seq-name-input", Input).value
+        self._save_in_memory()
         self.dismiss(self._sequence)
 
     def on_screen_dismissed(self, event: Screen.Dismissed) -> None:

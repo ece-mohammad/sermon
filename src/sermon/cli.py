@@ -313,19 +313,13 @@ class SermonApp(App):
         if self._screen_on_stack(SequenceEditorScreen):
             return
         self.push_screen(
-            SequenceEditorScreen(),
+            SequenceEditorScreen(sequences=self._sequences),
             self._on_sequence_edit,
         )
 
     def _on_sequence_edit(self, result: SequenceDefinition | None) -> None:
         if result is not None:
-            for i, s in enumerate(self._sequences):
-                if s.name == result.name:
-                    self._sequences[i] = result
-                    break
-            else:
-                self._sequences.append(result)
-            self.notify(f"Sequence '{result.name}' saved")
+            self.notify(f"Sequence '{result.name}' ready")
 
     def action_trigger_editor(self) -> None:
         if self._screen_on_stack(TriggerEditorScreen):

@@ -136,7 +136,7 @@ class OverviewScreen(Screen):
                 return
             seq = self._sequences[self._selected_index]
             self.app.push_screen(
-                SequenceEditorScreen(sequence=seq),
+                SequenceEditorScreen(sequence=seq, sequences=self._sequences),
                 self._on_sequence_edited,
             )
         elif self._selected_type == "Trigger" and self._selected_index is not None:
@@ -148,15 +148,8 @@ class OverviewScreen(Screen):
             )
 
     def _on_sequence_edited(self, result: SequenceDefinition | None) -> None:
-        if result is None:
-            return
-        for i, s in enumerate(self._sequences):
-            if s.name == result.name:
-                self._sequences[i] = result
-                break
-        else:
-            self._sequences.append(result)
-        self._refresh_table()
+        if result is not None:
+            self._refresh_table()
 
     def _on_triggers_edited(self, result: list[TriggerRule] | None) -> None:
         if result is not None:
