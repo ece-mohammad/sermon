@@ -64,11 +64,11 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] `match_all()` for non-overlapping matches
 - [x] Tests: const, wildcard, checksum (all 5 algos), greedy backtracking, match_all, edge cases
 
-### M5 — Sequence Editor UI
-- [ ] `DataTable`-based field list widget (add/remove/reorder rows)
-- [ ] Detail pane: name, type dropdown, hex input, checksum algo, scope picker, capture name
-- [ ] Inline validation (hex even-length, type constraints, etc.)
-- [ ] Load/save sequences to/from JSON
+### M5 — Sequence Editor UI ✓
+- [x] `DataTable`-based field list widget (add/remove/reorder rows)
+- [x] Detail pane: name, type dropdown, hex input, checksum algo, scope picker, capture name
+- [x] Inline validation (hex even-length, type constraints, etc.)
+- [x] Load/save sequences to/from JSON
 
 ### M6 — Trigger / Automation Engine
 - [ ] `TriggerRule(send_sequence, receive_sequence)` model
@@ -98,4 +98,6 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] F2 opens scrollable history list (most recent first), select to re-transmit
 - [x] TX input auto-focuses on app launch
 - [x] History list: alternating row colors, HEX/ASC mode labels colored differently
-- [x] Ctrl+T toggles dark/light theme
+- [x] F3 opens sequence editor (DataTable field list, detail pane, load/save JSON)
+- [x] Sequence editor section shortcuts: ctrl+n (name), ctrl+r (fields), ctrl+o (detail), ctrl+g (buttons)
+- [x] Port binding moved to ctrl+o (avoids conflict with Textual command palette on ctrl+p)
