@@ -339,44 +339,45 @@ class SequenceEditorScreen(Screen):
         self._updating_detail = True
         detail_name.disabled = False
         detail_type.disabled = False
-        detail_type.value = f.field_type
-        detail_name.value = f.name
+        with self.prevent(Input.Changed, Select.Changed):
+            detail_type.value = f.field_type
+            detail_name.value = f.name
 
-        if f.field_type == "const":
-            detail_value.disabled = False
-            detail_checksum.disabled = True
-            detail_scope.disabled = True
-            detail_capture.disabled = True
-            detail_value.value = f.value
-            detail_checksum.value = ""
-            detail_scope.value = ""
-            detail_capture.value = ""
-            val_msg.update("")
-            if not _validate_hex(f.value):
-                val_msg.update("Invalid hex value (must be even-length)")
-        elif f.field_type == "checksum":
-            detail_value.disabled = True
-            detail_value.value = ""
-            detail_checksum.disabled = False
-            detail_checksum.value = f.checksum_algorithm
-            detail_scope.disabled = False
-            if not detail_scope.value:
-                detail_scope.value = _format_scope(f.checksum_scope)
-            detail_capture.disabled = False
-            detail_capture.value = f.capture_name
-            val_msg.update("")
-            if not _validate_scope(detail_scope.value):
-                val_msg.update("Invalid scope format")
-        elif f.field_type == "wildcard":
-            detail_value.disabled = True
-            detail_value.value = ""
-            detail_checksum.disabled = True
-            detail_checksum.value = ""
-            detail_scope.disabled = True
-            detail_scope.value = ""
-            detail_capture.disabled = False
-            detail_capture.value = f.capture_name
-            val_msg.update("")
+            if f.field_type == "const":
+                detail_value.disabled = False
+                detail_checksum.disabled = True
+                detail_scope.disabled = True
+                detail_capture.disabled = True
+                detail_value.value = f.value
+                detail_checksum.value = ""
+                detail_scope.value = ""
+                detail_capture.value = ""
+                val_msg.update("")
+                if not _validate_hex(f.value):
+                    val_msg.update("Invalid hex value (must be even-length)")
+            elif f.field_type == "checksum":
+                detail_value.disabled = True
+                detail_value.value = ""
+                detail_checksum.disabled = False
+                detail_checksum.value = f.checksum_algorithm
+                detail_scope.disabled = False
+                if not detail_scope.value:
+                    detail_scope.value = _format_scope(f.checksum_scope)
+                detail_capture.disabled = False
+                detail_capture.value = f.capture_name
+                val_msg.update("")
+                if not _validate_scope(detail_scope.value):
+                    val_msg.update("Invalid scope format")
+            elif f.field_type == "wildcard":
+                detail_value.disabled = True
+                detail_value.value = ""
+                detail_checksum.disabled = True
+                detail_checksum.value = ""
+                detail_scope.disabled = True
+                detail_scope.value = ""
+                detail_capture.disabled = False
+                detail_capture.value = f.capture_name
+                val_msg.update("")
 
         self._updating_detail = False
 
