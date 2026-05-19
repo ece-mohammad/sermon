@@ -217,7 +217,7 @@ class SequenceEditorScreen(Screen):
                 ),
                 id="seq-name-row",
             ),
-            DataTable(id="field-table"),
+            DataTable(id="field-table", cursor_type="row"),
             self._render_detail_pane(),
             Label(id="validation-msg"),
             Horizontal(
