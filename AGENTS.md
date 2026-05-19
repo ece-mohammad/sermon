@@ -101,3 +101,5 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] F3 opens sequence editor (DataTable field list, detail pane, load/save JSON)
 - [x] Sequence editor section shortcuts: ctrl+n (name), ctrl+r (fields), ctrl+o (detail), ctrl+g (buttons)
 - [x] Port binding moved to ctrl+o (avoids conflict with Textual command palette on ctrl+p)
+- [x] RX/TX direction tags with color-coded display (green=RX, yellow=TX)
+- [x] TX echo toggle (ctrl+e) with on/off indicator in mode bar

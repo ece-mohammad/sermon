@@ -146,6 +146,7 @@ class SermonApp(App):
         Binding("ctrl+o", "connect_port", "Port", priority=True),
         Binding("ctrl+k", "disconnect", "Disconnect", priority=True),
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
+        Binding("ctrl+e", "toggle_echo", "Echo", priority=True),
         Binding("f2", "show_history", "History", priority=True),
         Binding("f3", "sequence_editor", "Sequences", priority=True),
         Binding("ctrl+c", "quit", "Quit", priority=True),
@@ -157,6 +158,7 @@ class SermonApp(App):
         self._reader_worker = None
         self._tx_history: list[tuple[str, bool]] = []
         self._tx_history_index = -1
+        self.tx_echo = True
 
     def compose(self) -> ComposeResult:
         yield Header(show_clock=True)
@@ -224,6 +226,8 @@ class SermonApp(App):
             else:
                 data = _unescape_ascii(text)
             self.serial.write(data)
+            if self.tx_echo:
+                rx_pane.append_data(data, datetime.now(), direction="TX")
             self.notify(f"TX: {len(data)} bytes")
         except ValueError:
             self.notify("Invalid hex characters", severity="error")
@@ -299,6 +303,11 @@ class SermonApp(App):
         rx_pane.hex_mode = not rx_pane.hex_mode
         self._update_mode_indicator()
 
+    def action_toggle_echo(self) -> None:
+        self.tx_echo = not self.tx_echo
+        self._update_mode_indicator()
+        self.notify(f"TX echo {'on' if self.tx_echo else 'off'}")
+
     def _start_reader(self) -> None:
         self._reader_worker = self.run_worker(
             self._read_loop,
@@ -328,7 +337,7 @@ class SermonApp(App):
     def _on_serial_data(self, data: bytes, timestamp: datetime) -> None:
         rx_pane = self.query_one(RxPane)
         if rx_pane:
-            rx_pane.append_data(data, timestamp)
+            rx_pane.append_data(data, timestamp, direction="RX")
 
     def _update_status(self) -> None:
         label = self.query_one("#status-bar", Label)
@@ -345,7 +354,10 @@ class SermonApp(App):
     def _update_mode_indicator(self) -> None:
         rx_pane = self.query_one(RxPane)
         indicator = self.query_one("#mode-indicator", Label)
-        indicator.update("HEX" if rx_pane.hex_mode else "ASCII")
+        mode = "HEX" if rx_pane.hex_mode else "ASCII"
+        if self.tx_echo:
+            mode += " Echo"
+        indicator.update(mode)
 
 
 def main() -> None:
