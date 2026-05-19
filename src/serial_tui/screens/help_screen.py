@@ -67,6 +67,10 @@ class HelpScreen(Screen):
                     "  Ctrl+L                Clear RX display",
                     classes="help-key",
                 ),
+                Label(
+                    "  Ctrl+S                Save log to file",
+                    classes="help-key",
+                ),
                 Label(""),
                 Label("TX Input", classes="help-section"),
                 Label("  Enter                 Send data", classes="help-key"),

@@ -150,4 +150,5 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] File logging to ~/.local/share/serial-tui/serial-tui.log
 - [x] Help shortcut: `?` key (F1 removed — intercepted by terminals)
 - [x] Ctrl+L clears RX display
+- [x] Ctrl+S saves log to timestamped file
 - [x] Notification toast on mode toggle (HEX/ASCII) and echo toggle

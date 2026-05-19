@@ -35,6 +35,7 @@
 **UX & Convenience**
 - F5 overview screen — combined table of all sequences and triggers
 - ? help screen listing all keybindings
+- Ctrl+S saves log to timestamped file
 - Ctrl+Y copies RX content to clipboard
 - Ctrl+L clears RX display
 - Notification toasts on mode/echo toggle
@@ -61,6 +62,7 @@ PYTHONPATH=src python -m serial_tui.cli
 | Ctrl+O | Configure serial port |
 | Ctrl+K | Disconnect |
 | Ctrl+D | Toggle HEX/ASCII display |
+| Ctrl+S | Save log to file |
 | Ctrl+L | Clear RX display |
 | Ctrl+E | Toggle TX echo |
 | Ctrl+Y | Copy RX log |

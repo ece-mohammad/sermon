@@ -170,6 +170,7 @@ class SermonApp(App):
         Binding("ctrl+d", "toggle_hex", "Hex", priority=True),
         Binding("ctrl+e", "toggle_echo", "Echo", priority=True),
         Binding("ctrl+y", "copy_rx", "Copy", priority=True),
+        Binding("ctrl+s", "save_log", "Save", priority=True),
         Binding("ctrl+l", "clear_rx", "Clear", priority=True),
         Binding("ctrl+t", "show_history", "History", priority=True),
         Binding("?", "show_help", "Help", priority=True),
@@ -442,6 +443,18 @@ class SermonApp(App):
         except FileNotFoundError:
             self.copy_to_clipboard(text)
         self.notify(f"Copied {len(text)} characters")
+
+    def action_save_log(self) -> None:
+        rx_pane = self.query_one(RxPane)
+        text = rx_pane.get_plain_text()
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        path = f"serial-log-{ts}.txt"
+        try:
+            with open(path, "w") as f:
+                f.write(text + "\n")
+            self.notify(f"Log saved: {path}")
+        except OSError as e:
+            self.notify(f"Save failed: {e}", severity="error")
 
     def action_clear_rx(self) -> None:
         rx_pane = self.query_one(RxPane)
