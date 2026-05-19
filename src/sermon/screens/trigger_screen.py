@@ -146,6 +146,15 @@ class TriggerEditorScreen(Screen):
             recv = r.receive_sequence.name if r.receive_sequence else ""
             table.add_row(r.name, active, send, recv)
 
+    def _refresh_and_select(self, index: int | None) -> None:
+        table = self.query_one("#trigger-table", DataTable)
+        with self.prevent(DataTable.RowHighlighted):
+            self._refresh_table()
+            self._selected_idx = index
+            if index is not None and 0 <= index < len(self._rules):
+                table.move_cursor(row=index)
+        self._update_detail()
+
     def _update_detail(self) -> None:
         idx = self._selected_idx
         if idx is not None and 0 <= idx < len(self._rules):
@@ -176,12 +185,8 @@ class TriggerEditorScreen(Screen):
             self.dismiss(self._rules)
         elif event.button.id == "add-btn":
             self._rules.append(TriggerRule(name=f"Rule {len(self._rules) + 1}"))
-            self._selected_idx = len(self._rules) - 1
-            self._refresh_table()
-            table = self.query_one("#trigger-table", DataTable)
-            table.focus()
-            table.move_cursor(row=self._selected_idx)
-            self._update_detail()
+            self._refresh_and_select(len(self._rules) - 1)
+            self.query_one("#trigger-table", DataTable).focus()
         elif event.button.id == "remove-btn":
             self.action_remove_trigger()
         elif event.button.id == "toggle-btn":
@@ -192,11 +197,11 @@ class TriggerEditorScreen(Screen):
             self._rules
         ):
             del self._rules[self._selected_idx]
-            self._selected_idx = min(self._selected_idx, len(self._rules) - 1)
-            if len(self._rules) == 0:
+            if not self._rules:
                 self._selected_idx = None
-            self._refresh_table()
-            self._update_detail()
+            else:
+                self._selected_idx = min(self._selected_idx, len(self._rules) - 1)
+            self._refresh_and_select(self._selected_idx)
 
     def action_toggle_active(self) -> None:
         if self._selected_idx is not None and 0 <= self._selected_idx < len(
@@ -205,13 +210,13 @@ class TriggerEditorScreen(Screen):
             self._rules[self._selected_idx].active = not self._rules[
                 self._selected_idx
             ].active
-            self._refresh_table()
+            self._refresh_and_select(self._selected_idx)
 
     def on_input_changed(self, event: Input.Changed) -> None:
         if event.input.id == "rule-name" and self._selected_idx is not None:
             if 0 <= self._selected_idx < len(self._rules):
                 self._rules[self._selected_idx].name = event.value
-                self._refresh_table()
+                self._refresh_and_select(self._selected_idx)
 
     def on_select_changed(self, event: Select.Changed) -> None:
         if self._selected_idx is None or not (
@@ -225,4 +230,4 @@ class TriggerEditorScreen(Screen):
         elif event.select.id == "recv-seq-select":
             seq = self._find_sequence(str(event.value)) if event.value else None
             rule.receive_sequence = seq
-        self._refresh_table()
+        self._refresh_and_select(self._selected_idx)

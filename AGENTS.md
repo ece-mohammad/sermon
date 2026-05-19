@@ -141,3 +141,4 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Sequence editor: "Cancel" button dismisses without saving
 - [x] Sequence editor: "Export"/"Import" buttons for JSON file I/O
 - [x] Sequence editor: buttons in 3 rows (field ops, persistence, close) for small terminal support
+- [x] Trigger editor: preserve row selection on add/remove/toggle/edit (same prevent pattern)
