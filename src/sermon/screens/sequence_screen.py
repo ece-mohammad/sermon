@@ -174,13 +174,19 @@ class SequenceEditorScreen(Screen):
     }
 
     #button-row {
-        height: 3;
+        height: auto;
         align: center middle;
         margin-bottom: 1;
     }
 
+    #button-row Horizontal {
+        height: 3;
+        align: center middle;
+    }
+
     #button-row Button {
         margin: 0 1;
+        min-width: 10;
     }
 
     #validation-msg {
@@ -225,15 +231,23 @@ class SequenceEditorScreen(Screen):
             DataTable(id="field-table", cursor_type="row"),
             self._render_detail_pane(),
             Label(id="validation-msg"),
-            Horizontal(
-                Button("Add Field", id="btn-add", variant="default"),
-                Button("Remove", id="btn-remove", variant="error"),
-                Button("▲ Up", id="btn-up"),
-                Button("▼ Down", id="btn-down"),
-                Button("Save", id="btn-save-mem", variant="primary"),
-                Button("Save...", id="btn-save"),
-                Button("Load...", id="btn-load"),
-                Button("Done", id="btn-done", variant="success"),
+            Vertical(
+                Horizontal(
+                    Button("Add Field", id="btn-add", variant="default"),
+                    Button("Remove", id="btn-remove", variant="error"),
+                    Button("▲ Up", id="btn-up"),
+                    Button("▼ Down", id="btn-down"),
+                ),
+                Horizontal(
+                    Button("Save", id="btn-save-mem", variant="primary"),
+                    Button("New", id="btn-new"),
+                    Button("Import", id="btn-load"),
+                    Button("Export", id="btn-save"),
+                ),
+                Horizontal(
+                    Button("Done", id="btn-done", variant="success"),
+                    Button("Cancel", id="btn-cancel", variant="default"),
+                ),
                 id="button-row",
             ),
             id="seq-content",
@@ -472,8 +486,12 @@ class SequenceEditorScreen(Screen):
             self._save_sequence()
         elif btn == "btn-load":
             self._load_sequence()
+        elif btn == "btn-new":
+            self._new_sequence()
         elif btn == "btn-done":
             self._finish()
+        elif btn == "btn-cancel":
+            self.dismiss(None)
 
     def action_focus_name(self) -> None:
         self.query_one("#seq-name-input", Input).focus()
@@ -587,6 +605,15 @@ class SequenceEditorScreen(Screen):
                 self.notify(f"Load failed: {e}", severity="error")
 
         self.app.push_screen(_get_path_screen("Load sequence from:", ".json"), on_path)
+
+    def _new_sequence(self) -> None:
+        self._sequence = SequenceDefinition(name="NewSequence")
+        self.query_one("#seq-name-input", Input).value = "NewSequence"
+        self._selected_index = None
+        with self.prevent(DataTable.RowHighlighted):
+            self._refresh_table()
+        self._update_detail_state()
+        self.notify("New sequence created")
 
     def _finish(self) -> None:
         self._sequence.name = self.query_one("#seq-name-input", Input).value

@@ -137,3 +137,7 @@ If something here looks stale, prefer executable sources (pyproject.toml, src/ f
 - [x] Sequence editor: preserve field selection on edit/add/remove/reorder/load (prevent unwanted cursor reset)
 - [x] Sequence editor: "Save" button stores sequence in app memory without closing
 - [x] Sequence editor: "Done" button saves to memory before closing (via _save_in_memory)
+- [x] Sequence editor: "New" button creates a fresh blank sequence
+- [x] Sequence editor: "Cancel" button dismisses without saving
+- [x] Sequence editor: "Export"/"Import" buttons for JSON file I/O
+- [x] Sequence editor: buttons in 3 rows (field ops, persistence, close) for small terminal support
